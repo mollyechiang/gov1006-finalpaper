@@ -570,3 +570,18 @@ raw.results.table.latex <- latex(raw.results.table, cdec = c(2, 2, 0, 0, 0), fil
 
 ```
 
+```{r loess estimator, include=FALSE}
+
+#DNIT Analysis 
+
+##All Donation Recipients
+lo.all <-  with(lo.all.data[lo.all.data$donations > 0,], lo.ate(y = log((contracts.dnit.0810 + 1)/donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all$est.unlogged <- reais.format(exp(lo.all$tr.est) - exp(lo.all$con.est))
+lo.all$num.donors <- with(lo.all.data[lo.all.data$donations > 0, ], lo.ate(y = log(donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all$num.donors <- mean(exp(lo.all$num.donors$tr.est), exp(lo.all$num.donors$con.est))
+lo.all$donations <- with(lo.all.data[lo.all.data$donations > 0, ] , lo.ate(y = log(donations), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all$donations <- reais.format(mean(exp(lo.all$donations$tr.est) , exp(lo.all$donations$con.est)) / lo.all$num.donors)
+lo.all$N <- nrow(depfed_data[abs(depfed_data$votemargin) < lo.bw  & depfed_data$donations > 0,]) 
+
+```
+
