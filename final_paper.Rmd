@@ -230,3 +230,13 @@ ply.pt.pw.data <- depfed_data[abs(depfed_data$votemargin) < ply.bw & depfed_data
 
 ```
 
+```{r polynomial data balance samples, include=FALSE}
+
+ply.all.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$donations > 0,]
+ply.all.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$pw.donations>0,]
+ply.coal.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$pw.donations>0 & depfed.balance$party %in% c('PMDB','PP','PV','PSB','PC do B','PDT','PL','PRONA'),]
+ply.pt.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$pw.donations>0 & depfed.balance$party == "PT",]
+
+
+```
+
