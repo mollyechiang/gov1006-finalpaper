@@ -161,6 +161,11 @@ mccrary.test <- function(force.var, h = .75, n.boots = 1000){
   list(wald.stat = wald.stat, se = sd(log.dis.bs, na.rm = TRUE))  
 }
 
+```
+
+```{r number of bootstrap samples, include=FALSE}
+
+num.boots <- 1000
 
 ```
 
