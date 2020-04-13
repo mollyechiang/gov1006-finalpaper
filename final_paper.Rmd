@@ -7,4 +7,16 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+library(foreign)
+library(ggplot2)
+library(grid)
+library(gridExtra)
 ```
+
+```{r importing data for 1994 table}
+
+d <- read.dta("raw-data/idasa_1994_ddk12.dta")
+
+```
+
