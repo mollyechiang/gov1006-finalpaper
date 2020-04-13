@@ -51,3 +51,42 @@ reais.format <- function(x){
 
 ```
 
+```{r discontinuity function,include=FALSE}
+
+discont.plot <- function(y, force.var, cluster, treat,  span = .7, n.boots = 100, bins = 25, xlab = "Forcing Variable", ylab = "Outcome", title="", degree = degree){
+  data <- data.frame(y=y, force.var = force.var, cluster.id = cluster, treat = treat)
+  clusters <- unique(cluster)
+  for(i in 1:n.boots){
+    bs.clusters <- data.frame(cluster.id=sample(clusters, replace=TRUE))
+    bs.data <- merge(bs.clusters, data,all.x=TRUE,all.y=FALSE, by.x="cluster.id", by.y="cluster.id")
+    lo.treat <- loess(y~force.var, data = bs.data[bs.data$treat==1,], span=span, surface="direct", degree = degree)
+    lo.control <- loess(y~force.var, data = bs.data[bs.data$treat==0,], span=span, surface="direct", degree = degree)
+    lo.fit.treat <- predict(lo.treat, newdata = data$force.var[data$treat==1])
+    lo.fit.control <- predict(lo.control, newdata = data$force.var[data$treat==0])
+    if(i ==1){
+      lo.treat.bs <- matrix(nrow=length(lo.fit.treat), ncol = n.boots)
+      lo.control.bs <- matrix(nrow=length(lo.fit.control), ncol = n.boots)
+    }
+    lo.treat.bs[,i] <- lo.fit.treat
+    lo.control.bs[,i] <- lo.fit.control
+    if( i %% (0.1 * n.boots) == 0) {  # output progress for each p
+      cat(".")
+    }
+  }
+  lo.treat <- loess(y~force.var, data = data[data$treat==1,], span=span, surface="direct", degree = degree)
+  lo.control <- loess(y~force.var, data = data[data$treat==0,], span=span, surface="direct", degree = degree)
+  lo.fit.treat <- predict(lo.treat, newdata = data$force.var[data$treat==1])
+  lo.fit.control <- predict(lo.control, newdata = data$force.var[data$treat==0])
+  lo.results.treat <- data.frame(force.var = data$force.var[data$treat==1], y = data$y[data$treat==1], y.fit = lo.fit.treat, conf.hi =  apply(lo.treat.bs,1,quantile,probs=c(.025)), conf.lo =  apply(lo.treat.bs,1,quantile,probs=c(.975)),treat=1)
+  lo.results.treat$bin <- sapply(strsplit(gsub("^\\W|\\W$", "", cut(lo.results.treat$force.var, breaks = bins)), ","), function(x)sum(as.numeric(x))/2)
+  lo.results.treat <- ddply(lo.results.treat, .(bin), transform, bin.mean = mean(y)) 
+  lo.results.control <- data.frame(force.var = data$force.var[data$treat==0], y = data$y[data$treat==0], y.fit = lo.fit.control, conf.hi =  apply(lo.control.bs,1,quantile,probs=c(.025)), conf.lo =  apply(lo.control.bs,1,quantile,probs=c(.975)),treat=0)
+  lo.results.control$bin <- sapply(strsplit(gsub("^\\W|\\W$", "", cut(lo.results.control$force.var, breaks = bins)), ","), function(x)sum(as.numeric(x))/2)
+  lo.results.control <- ddply(lo.results.control, .(bin), transform, bin.mean = mean(y))
+  lo.results <- rbind(lo.results.treat, lo.results.control)
+  lo.results$treat <- as.factor(lo.results$treat)
+  ggplot(lo.results, aes(x=force.var, y = y.fit, group=treat, color = treat)) + geom_line(aes(y=y.fit), size=1.5)  + geom_vline(xintercept=0) + geom_ribbon(aes(ymin = conf.hi, ymax=conf.lo), alpha =.2)  + geom_point(aes(x=bin, y=bin.mean)) + theme_bw()   + theme(legend.position = "none")  + scale_colour_brewer(palette="Set1")  + scale_x_continuous(xlab) +  scale_y_continuous(ylab) + labs(title = title) + theme(axis.title.x = element_text(vjust = .3)) + theme(plot.title = element_text(size = rel(.9)))
+}
+
+```
+
