@@ -585,3 +585,15 @@ lo.all$N <- nrow(depfed_data[abs(depfed_data$votemargin) < lo.bw  & depfed_data$
 
 ```
 
+```{r DNIT public works all, include=FALSE}
+
+lo.all.pw <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ], lo.ate(y = log((pwcontracts.dnit.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all.pw$est.unlogged <- reais.format(exp(lo.all.pw$tr.est) - exp(lo.all.pw$con.est))
+lo.all.pw$num.donors <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ], lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all.pw$num.donors <- mean(exp(lo.all.pw$num.donors$tr.est), exp(lo.all.pw$num.donors$con.est))
+lo.all.pw$donations <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ] , lo.ate(y = log(pw.donations), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.all.pw$donations <- reais.format(mean(exp(lo.all.pw$donations$tr.est) , exp(lo.all.pw$donations$con.est)) / lo.all.pw$num.donors)
+lo.all.pw$N <- nrow(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ])
+
+```
+
