@@ -118,6 +118,49 @@ lo.ate <- function(y, treat, force.var, span = 1, R = 500, degree = 2, replicate
   }
 }
 
+```
+
+```{r mccrary density test function, include=FALSE}
+
+mccrary.test <- function(force.var, h = .75, n.boots = 1000){
+  ##Note that this function assumes that the discontinuity is at 0
+  force.below <-force.var[force.var<0]
+  force.below <- force.below[force.below>=quantile(force.below, prob=.1)]
+  force.above <-force.var[force.var>0]
+  force.above <- force.above[force.above<=quantile(force.above, prob=.9)]
+  bin.width <- 2 * sd(c(force.above,force.below)) * 1/sqrt(length(c(force.below,force.above)))
+  force.below.bin <-  data.frame(table(cut(force.below, breaks = seq(0, min(force.below), by=-1*bin.width ))))
+  force.above.bin <- data.frame(table(cut(force.above, breaks = seq(0, max(force.above), by=bin.width ))))
+  force.below.bin$Var1 <- sapply(strsplit(gsub("^\\W|\\W$", "", force.below.bin$Var1), ","), function(x)sum(as.numeric(x))/2)
+  force.above.bin$Var1 <- sapply(strsplit(gsub("^\\W|\\W$", "", force.above.bin$Var1), ","), function(x)sum(as.numeric(x))/2)
+  bin.freq <- rbind(force.below.bin, force.above.bin)
+  lo.fit.above <- loess(Freq~Var1, data = bin.freq[bin.freq$Var1>0,], degree=1,span = h)
+  lo.fit.below <- loess(Freq~Var1, data = bin.freq[bin.freq$Var1<0,], degree=1,span = h)
+  lo.predict <- rbind(data.frame(bin.mid = bin.freq$Var1[bin.freq$Var1<0],  pred.dens = predict(lo.fit.below)),data.frame(bin.mid = bin.freq$Var1[bin.freq$Var1>0],  pred.dens = predict(lo.fit.above)))
+  wald.stat <- log(predict(loess(pred.dens~bin.mid, data=lo.predict[lo.predict$bin.mid<0,],span=h,degree=1, surface="direct") ,newdata=data.frame(bin.mid=0))) - log(predict(loess(pred.dens~bin.mid, data=lo.predict[lo.predict$bin.mid>0,],span=h,degree=1, surface="direct") ,newdata=data.frame(bin.mid=0)))
+  
+  #use the bootstrap to calculate standard error
+  log.dis.bs <- matrix(nrow = n.boots)
+  for(i in 1:n.boots){
+    force.above.bs <- force.above[sample(1:length(force.above), replace = TRUE)]
+    force.below.bs <- force.below[sample(1:length(force.below), replace = TRUE)]
+    force.below.bs <- force.below.bs[force.below.bs>=quantile(force.below.bs, prob=.1)]
+    force.above.bs <- force.above.bs[force.above.bs<=quantile(force.above.bs, prob=.9)]
+    bin.width <- 2 * sd(c(force.above.bs,force.below.bs)) * 1/sqrt(length(c(force.below.bs, force.above.bs)))
+    force.below.bin <-  data.frame(table(cut(force.below.bs, breaks = seq(0, min(force.below.bs), by=-1*bin.width ))))
+    force.above.bin <- data.frame(table(cut(force.above.bs, breaks = seq(0, max(force.above.bs), by=bin.width ))))
+    force.below.bin$Var1 <- sapply(strsplit(gsub("^\\W|\\W$", "", force.below.bin$Var1), ","), function(x)sum(as.numeric(x))/2)
+    force.above.bin$Var1 <- sapply(strsplit(gsub("^\\W|\\W$", "", force.above.bin$Var1), ","), function(x)sum(as.numeric(x))/2)
+    bin.freq <- rbind(force.below.bin, force.above.bin)
+    lo.fit.above <- loess(Freq~Var1, data = bin.freq[bin.freq$Var1>0,], degree=1,span = h)
+    lo.fit.below <- loess(Freq~Var1, data = bin.freq[bin.freq$Var1<0,], degree=1,span = h)
+    lo.predict <- rbind(data.frame(bin.mid = bin.freq$Var1[bin.freq$Var1<0],  pred.dens = predict(lo.fit.below)),data.frame(bin.mid = bin.freq$Var1[bin.freq$Var1>0],  pred.dens = predict(lo.fit.above)))
+    
+    log.dis.bs[i] <- log(predict(loess(pred.dens~bin.mid, data=lo.predict[lo.predict$bin.mid<0,],span=h,degree=1, surface="direct") ,newdata=data.frame(bin.mid=0))) - log(predict(loess(pred.dens~bin.mid, data=lo.predict[lo.predict$bin.mid>0,],span=h,degree=1, surface="direct") ,newdata=data.frame(bin.mid=0)))
+  }
+  list(wald.stat = wald.stat, se = sd(log.dis.bs, na.rm = TRUE))  
+}
+
 
 ```
 
