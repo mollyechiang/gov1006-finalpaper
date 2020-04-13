@@ -1,0 +1,19 @@
+%latex.default(dnit.results.table, cdec = c(2, 2, 0, 0, 0), file = "table1_dnit_contracts.tex",     col.just = rep("c", 5), rowname = c("All", "Pub. works donations",         "Pub. works, coalition", "Pub. works, PT", "All", "Pub. works donations",         "Pub. works, coalition", "Pub. works, PT", "All", "Pub. works donations",         "Pub. works, coalition", "Pub. works, PT"), rowlabel = "Sample",     caption = "The Effect of Electoral Victory on Future Contracts from the National Department of Transportation Infrastructure (DNIT).",     insert.bottom = bottom.note, rgroup = c("Loess Estimator",         "Polynomial Estimator", "Local Linear Estimator"), n.rgroup = c(4,         4, 4), booktabs = FALSE, ctable = TRUE, where = "htp")%
+\ctable[caption={The Effect of Electoral Victory on Future Contracts from the National Department of Transportation Infrastructure (DNIT).},label=dnit.results.table,pos=htp,]{lccccc}{\tnote[]{Dependent variable is the log of the average value of contracts (plus one) issued by DNIT that are received by a candidate's corporate donors, January 2008--September 2010. ``Coalition'' candidates are those from the PMDB, PP, PV, PSB, PC do B, PDT, PL, and PRONA in 2006. The unlogged treatment effect is given by $exp(E[Y_{ij}(1)|M_{ij} =0]) - exp(E[Y_{ij}(0)|M_{ij} =0])$. ``Mean Donation'' is the estimated donation per firm for candidates at the discontinuity.  The loess specification uses a bandwidth of 40,000 votes and a span of 1. The local linear and polynomial specifications use bandwidths of 25,000 and 100,000 votes, respectively.  Loess standard errors are bootstrapped; others are heteroskedasticity-robust.}}{\FL
+\multicolumn{1}{l}{Sample}&\multicolumn{1}{c}{$\tau_{RD}$}&\multicolumn{1}{c}{SE}&\multicolumn{1}{c}{$\tau_{RD}$, unlogged}&\multicolumn{1}{c}{Mean Donation}&\multicolumn{1}{c}{N}\ML
+{\bfseries Loess Estimator}&&&&&\NN
+~~All&0.94&1.51&R\$ 12&R\$ 10,412&693\NN
+~~Pub. works donations&1.6&2.49&R\$ 623&R\$ 10,541&354\NN
+~~Pub. works, coalition&-1.46&4.59&R\$ -1,667&R\$ 9,569&155\NN
+~~Pub. works, PT&7.69&5.18&R\$ 599&R\$ 10,497&68\ML
+{\bfseries Polynomial Estimator}&&&&&\NN
+~~All&0.64&1.26&R\$ 8&R\$ 58,752&1343\NN
+~~Pub. works donations&2.49&2.15&R\$ 1,516&R\$ 17,997&576\NN
+~~Pub. works, coalition&-1.07&3.48&R\$ -1,402&R\$ 26,205&241\NN
+~~Pub. works, PT&8.94&4.5&R\$ 755&R\$ 8,774&112\ML
+{\bfseries Local Linear Estimator}&&&&&\NN
+~~All&0.98&1.22&R\$ 15&R\$ 62,556&463\NN
+~~Pub. works donations&1.97&2.06&R\$ 1,107&R\$ 19,158&236\NN
+~~Pub. works, coalition&-1.63&3.17&R\$ -5,997&R\$ 29,013&111\NN
+~~Pub. works, PT&6.98&3.76&R\$ 466&R\$ 8,936&45\LL
+}

@@ -2,7 +2,11 @@
 title: "Final Paper"
 author: "Chelsea Marlborough"
 date: "4/13/2020"
-output: html_document
+#output: html_document
+output: bookdown::pdf_document2
+bibliography: bibliography.bib
+#biblio-style: "apalike"
+link-citations: true
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +20,8 @@ library(grid)
 library(plyr)
 library(tidyverse)
 library(dplyr)
+library(tinytex)
+library(plotly)
 
 ```
 
@@ -450,7 +456,6 @@ lo.coal.pw$N <- nrow(lo.coal.pw.data)
 ```
 
 ```{r public works pt, include=FALSE}
-
 lo.pt.pw <- with(lo.pt.pw.data, lo.ate(y = log((pw.con.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
 lo.pt.pw$est.unlogged <- reais.format(exp(lo.pt.pw$tr.est) - exp(lo.pt.pw$con.est))
 lo.pt.pw$num.donors <- with(lo.pt.pw.data, lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
@@ -550,7 +555,10 @@ ply.pt.pw$num.donors <- mean(exp(coef(ply.pt.pw$num.donors)[1,1]), exp(coef(ply.
 ply.pt.pw$donations <- summaryR.lm(lm(as.formula(paste("log(pw.donations) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))), data = ply.pt.pw.data), type = "hc2")
 ply.pt.pw$donations <- reais.format( mean(exp(coef(ply.pt.pw$donations)[1,1]), exp(coef(ply.pt.pw$donations)[1,1] + coef(ply.pt.pw$donations)[2,1])))
 ply.pt.pw$N <- nrow(ply.pt.pw.data)
+```
 
+
+```{r table}
 #Gather all results into one table
 raw.results.table <- data.frame(cbind(
   round(c(lo.all$est, lo.all.pw$est, lo.coal.pw$est, lo.pt.pw$est, ply.all$est, ply.all.pw$est, ply.coal.pw$est, ply.pt.pw$est,  ll.all$est, ll.all.pw$est, ll.coal.pw$est, ll.pt.pw$est), 2),
@@ -570,10 +578,10 @@ raw.results.table.latex <- latex(raw.results.table, cdec = c(2, 2, 0, 0, 0), fil
 
 ```
 
-```{r loess estimator, include=FALSE}
+```{r}
+##DNIT Analysis
 
-#DNIT Analysis 
-
+###Loess Estimator
 ##All Donation Recipients
 lo.all <-  with(lo.all.data[lo.all.data$donations > 0,], lo.ate(y = log((contracts.dnit.0810 + 1)/donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
 lo.all$est.unlogged <- reais.format(exp(lo.all$tr.est) - exp(lo.all$con.est))
@@ -583,10 +591,7 @@ lo.all$donations <- with(lo.all.data[lo.all.data$donations > 0, ] , lo.ate(y = l
 lo.all$donations <- reais.format(mean(exp(lo.all$donations$tr.est) , exp(lo.all$donations$con.est)) / lo.all$num.donors)
 lo.all$N <- nrow(depfed_data[abs(depfed_data$votemargin) < lo.bw  & depfed_data$donations > 0,]) 
 
-```
-
-```{r DNIT public works all, include=FALSE}
-
+##Public Works, all
 lo.all.pw <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ], lo.ate(y = log((pwcontracts.dnit.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
 lo.all.pw$est.unlogged <- reais.format(exp(lo.all.pw$tr.est) - exp(lo.all.pw$con.est))
 lo.all.pw$num.donors <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ], lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
@@ -595,10 +600,7 @@ lo.all.pw$donations <- with(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ] , 
 lo.all.pw$donations <- reais.format(mean(exp(lo.all.pw$donations$tr.est) , exp(lo.all.pw$donations$con.est)) / lo.all.pw$num.donors)
 lo.all.pw$N <- nrow(lo.all.pw.data[lo.all.pw.data$pw.donations > 0, ])
 
-```
-
-```{r DNIT public works coalition, include=FALSE}
-
+##Public works, coalition
 lo.coal.pw <- with(lo.coal.pw.data[lo.coal.pw.data$pw.donations > 0, ], lo.ate(y = log((pwcontracts.dnit.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
 lo.coal.pw$est.unlogged <- reais.format(exp(lo.coal.pw$tr.est) - exp(lo.coal.pw$con.est))
 lo.coal.pw$num.donors <- with(lo.coal.pw.data[lo.coal.pw.data$pw.donations > 0, ], lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
@@ -606,6 +608,168 @@ lo.coal.pw$num.donors <- mean(exp(lo.coal.pw$num.donors$tr.est), exp(lo.coal.pw$
 lo.coal.pw$donations <- with(lo.coal.pw.data[lo.coal.pw.data$pw.donations > 0, ] , lo.ate(y = log(pw.donations), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
 lo.coal.pw$donations <- reais.format(mean(exp(lo.coal.pw$donations$tr.est) , exp(lo.coal.pw$donations$con.est)) / lo.coal.pw$num.donors)
 lo.coal.pw$N <- nrow(lo.coal.pw.data)
+
+##Public works, PT
+lo.pt.pw <- with(lo.pt.pw.data[lo.pt.pw.data$pw.donations > 0 , ], lo.ate(y = log((pwcontracts.dnit.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.pt.pw$est.unlogged <- reais.format(exp(lo.pt.pw$tr.est) - exp(lo.pt.pw$con.est))
+lo.pt.pw$num.donors <- with(lo.pt.pw.data[lo.pt.pw.data$pw.donations > 0 , ], lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.pt.pw$num.donors <- mean(exp(lo.pt.pw$num.donors$tr.est), exp(lo.pt.pw$num.donors$con.est))
+lo.pt.pw$donations <- with(lo.pt.pw.data[lo.pt.pw.data$pw.donations > 0 , ] , lo.ate(y = log(pw.donations), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.pt.pw$donations <- reais.format(mean(exp(lo.pt.pw$donations$tr.est) , exp(lo.pt.pw$donations$con.est)) / lo.pt.pw$num.donors)
+lo.pt.pw$N <- nrow(lo.pt.pw.data)
+
+###Local Linear
+##All candidates
+ll.all <- summaryR.lm(lm(log((contracts.dnit.0810 + 1)/donor.firms) ~ elected*votemargin, data = ll.all.data[ll.all.data$donations > 0, ]), type = "hc2")
+ll.all$est <- coef(ll.all)[2,1]
+ll.all$se <- coef(ll.all)[2,2]
+ll.all$est.unlogged <- reais.format(exp(coef(ll.all)[1,1] + coef(ll.all)[2,1]) - exp(coef(ll.all)[1,1]))
+ll.all$num.donors <- summaryR.lm(lm(log(donor.firms) ~ elected*votemargin , data = ll.all.data[ll.all.data$donations > 0, ]), type = "hc2")
+ll.all$num.donors <- mean(exp(coef(ll.all$num.donors)[1,1]), exp(coef(ll.all$num.donors)[1,1] + coef(ll.all$num.donors)[2,1] ))
+ll.all$donations <- summaryR.lm(lm(log(donations) ~ elected*votemargin , data = ll.all.data[ll.all.data$donations > 0, ]), type = "hc2")
+ll.all$donations <- reais.format( mean(exp(coef(ll.all$donations)[1,1]), exp(coef(ll.all$donations)[1,1] + coef(ll.all$donations)[2,1])))
+ll.all$N <- nrow(ll.all.data)
+
+##Public works
+ll.all.pw <- summaryR.lm(lm(log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected*votemargin, data = ll.all.pw.data[ll.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.all.pw$est <- coef(ll.all.pw)[2,1]
+ll.all.pw$se <- coef(ll.all.pw)[2,2]
+ll.all.pw$est.unlogged <- reais.format(exp(coef(ll.all.pw)[1,1] + coef(ll.all.pw)[2,1]) - exp(coef(ll.all.pw)[1,1]))
+ll.all.pw$num.donors <- summaryR.lm(lm(log(pw.donor.firms) ~ elected*votemargin , data = ll.all.pw.data[ll.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.all.pw$num.donors <- mean(exp(coef(ll.all.pw$num.donors)[1,1]), exp(coef(ll.all.pw$num.donors)[1,1] + coef(ll.all.pw$num.donors)[2,1] ))
+ll.all.pw$donations <- summaryR.lm(lm(log(pw.donations) ~ elected*votemargin , data = ll.all.pw.data[ll.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.all.pw$donations <- reais.format( mean(exp(coef(ll.all.pw$donations)[1,1]), exp(coef(ll.all.pw$donations)[1,1] + coef(ll.all.pw$donations)[2,1])))
+ll.all.pw$N <- nrow(ll.all.pw.data)
+
+##Coalition, public works
+ll.coal.pw <- summaryR.lm(lm(log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected*votemargin, data = ll.coal.pw.data[ll.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.coal.pw$est <- coef(ll.coal.pw)[2,1]
+ll.coal.pw$se <- coef(ll.coal.pw)[2,2]
+ll.coal.pw$est.unlogged <- reais.format(exp(coef(ll.coal.pw)[1,1] + coef(ll.coal.pw)[2,1]) - exp(coef(ll.coal.pw)[1,1]))
+ll.coal.pw$num.donors <- summaryR.lm(lm(log(pw.donor.firms) ~ elected*votemargin , data = ll.coal.pw.data[ll.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.coal.pw$num.donors <- mean(exp(coef(ll.coal.pw$num.donors)[1,1]), exp(coef(ll.coal.pw$num.donors)[1,1] + coef(ll.coal.pw$num.donors)[2,1] ))
+ll.coal.pw$donations <- summaryR.lm(lm(log(pw.donations) ~ elected*votemargin , data = ll.coal.pw.data[ll.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.coal.pw$donations <- reais.format( mean(exp(coef(ll.coal.pw$donations)[1,1]), exp(coef(ll.coal.pw$donations)[1,1] + coef(ll.coal.pw$donations)[2,1])))
+ll.coal.pw$N <- nrow(ll.coal.pw.data)
+
+##PT. public works
+ll.pt.pw <- summaryR.lm(lm(log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected*votemargin, data = ll.pt.pw.data[ll.pt.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.pt.pw$est <- coef(ll.pt.pw)[2,1]
+ll.pt.pw$se <- coef(ll.pt.pw)[2,2]
+ll.pt.pw$est.unlogged <- reais.format(exp(coef(ll.pt.pw)[1,1] + coef(ll.pt.pw)[2,1]) - exp(coef(ll.pt.pw)[1,1]))
+ll.pt.pw$num.donors <- summaryR.lm(lm(log(pw.donor.firms) ~ elected*votemargin , data = ll.pt.pw.data[ll.pt.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.pt.pw$num.donors <- mean(exp(coef(ll.pt.pw$num.donors)[1,1]), exp(coef(ll.pt.pw$num.donors)[1,1] + coef(ll.pt.pw$num.donors)[2,1] ))
+ll.pt.pw$donations <- summaryR.lm(lm(log(pw.donations) ~ elected*votemargin , data = ll.pt.pw.data[ll.pt.pw.data$pw.donations > 0, ]), type = "hc2")
+ll.pt.pw$donations <- reais.format( mean(exp(coef(ll.pt.pw$donations)[1,1]), exp(coef(ll.pt.pw$donations)[1,1] + coef(ll.pt.pw$donations)[2,1])))
+ll.pt.pw$N <- nrow(ll.pt.pw.data)
+
+###Higher Order Polynomial Specification
+
+##All candidates
+ply.all <- summaryR.lm(lm(as.formula(paste("log((contracts.dnit.0810 + 1)/donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))   , data = ply.all.data[ply.all.data$donations > 0, ]))
+ply.all$est <- coef(ply.all)[2,1]
+ply.all$se <- coef(ply.all)[2,2]
+ply.all$est.unlogged <- reais.format(exp(coef(ply.all)[1,1] + coef(ply.all)[2,1]) - exp(coef(ply.all)[1,1]))
+ply.all$num.donors <- summaryR.lm(lm(as.formula(paste("log(donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.all.data[ply.all.data$donations > 0, ]), type = "hc2")
+ply.all$num.donors <- mean(exp(coef(ply.all$num.donors)[1,1]), exp(coef(ply.all$num.donors)[1,1] + coef(ply.all$num.donors)[2,1] ))
+ply.all$donations <- summaryR.lm(lm(as.formula(paste("log((donations)) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.all.data[ply.all.data$donations > 0, ]), type = "hc2")
+ply.all$donations <- reais.format( mean(exp(coef(ply.all$donations)[1,1]), exp(coef(ply.all$donations)[1,1] + coef(ply.all$donations)[2,1])))
+ply.all$N <- nrow(ply.all.data[ply.all.data$donations > 0, ])
+
+##Public works
+ply.all.pw <- summaryR.lm(lm(as.formula(paste("log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.all.pw.data[ply.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.all.pw$est <- coef(ply.all.pw)[2,1]
+ply.all.pw$se <- coef(ply.all.pw)[2,2]
+ply.all.pw$est.unlogged <- reais.format(exp(coef(ply.all.pw)[1,1] + coef(ply.all.pw)[2,1]) - exp(coef(ply.all.pw)[1,1]))
+ply.all.pw$num.donors <- summaryR.lm(lm(as.formula(paste("log(pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.all.pw.data[ply.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.all.pw$num.donors <- mean(exp(coef(ply.all.pw$num.donors)[1,1]), exp(coef(ply.all.pw$num.donors)[1,1] + coef(ply.all.pw$num.donors)[2,1] ))
+ply.all.pw$donations <- summaryR.lm(lm(as.formula(paste("log(pw.donations) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.all.pw.data[ply.all.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.all.pw$donations <- reais.format( mean(exp(coef(ply.all.pw$donations)[1,1]), exp(coef(ply.all.pw$donations)[1,1] + coef(ply.all.pw$donations)[2,1])))
+ply.all.pw$N <- nrow(ply.all.pw.data[ply.all.pw.data$pw.donations > 0, ])
+
+##Coalition, public works
+ply.coal.pw <- summaryR.lm(lm(as.formula(paste("log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.coal.pw.data[ply.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.coal.pw$est <- coef(ply.coal.pw)[2,1]
+ply.coal.pw$se <- coef(ply.coal.pw)[2,2]
+ply.coal.pw$est.unlogged <- reais.format(exp(coef(ply.coal.pw)[1,1] + coef(ply.coal.pw)[2,1]) - exp(coef(ply.coal.pw)[1,1]))
+ply.coal.pw$num.donors <- summaryR.lm(lm(as.formula(paste("log(pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.coal.pw.data[ply.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.coal.pw$num.donors <- mean(exp(coef(ply.coal.pw$num.donors)[1,1]), exp(coef(ply.coal.pw$num.donors)[1,1] + coef(ply.coal.pw$num.donors)[2,1] ))
+ply.coal.pw$donations <- summaryR.lm(lm(as.formula(paste("log(pw.donations) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.coal.pw.data[ply.coal.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.coal.pw$donations <- reais.format( mean(exp(coef(ply.coal.pw$donations)[1,1]), exp(coef(ply.coal.pw$donations)[1,1] + coef(ply.coal.pw$donations)[2,1])))
+ply.coal.pw$N <- nrow(ply.coal.pw.data)
+
+##PT. public works
+ply.pt.pw <- summaryR.lm(lm(as.formula(paste("log((pwcontracts.dnit.0810 + 1)/pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.pt.pw.data[ply.pt.pw.data$pw.donations > 0, ]))
+ply.pt.pw$est <- coef(ply.pt.pw)[2,1]
+ply.pt.pw$se <- coef(ply.pt.pw)[2,2]
+ply.pt.pw$est.unlogged <- reais.format(exp(coef(ply.pt.pw)[1,1] + coef(ply.pt.pw)[2,1]) - exp(coef(ply.pt.pw)[1,1]))
+ply.pt.pw$num.donors <- summaryR.lm(lm(as.formula(paste("log(pw.donor.firms) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + ")))  , data = ply.pt.pw.data[ply.pt.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.pt.pw$num.donors <- mean(exp(coef(ply.pt.pw$num.donors)[1,1]), exp(coef(ply.pt.pw$num.donors)[1,1] + coef(ply.pt.pw$num.donors)[2,1] ))
+ply.pt.pw$donations <- summaryR.lm(lm(as.formula(paste("log(pw.donations) ~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))), data = ply.pt.pw.data[ply.pt.pw.data$pw.donations > 0, ]), type = "hc2")
+ply.pt.pw$donations <- reais.format( mean(exp(coef(ply.pt.pw$donations)[1,1]), exp(coef(ply.pt.pw$donations)[1,1] + coef(ply.pt.pw$donations)[2,1])))
+ply.pt.pw$N <- nrow(ply.pt.pw.data[ply.pt.pw.data$pw.donations > 0, ])
+
+
+dnit.results.table <- data.frame(cbind(
+  round(c(lo.all$est, lo.all.pw$est, lo.coal.pw$est, lo.pt.pw$est, ply.all$est, ply.all.pw$est, ply.coal.pw$est, ply.pt.pw$est,  ll.all$est, ll.all.pw$est, ll.coal.pw$est, ll.pt.pw$est), 2),
+  round(c(lo.all$se, lo.all.pw$se, lo.coal.pw$se, lo.pt.pw$se, ply.all$se, ply.all.pw$se, ply.coal.pw$se, ply.pt.pw$se, ll.all$se, ll.all.pw$se, ll.coal.pw$se, ll.pt.pw$se),2),
+  c(lo.all$est.unlogged, lo.all.pw$est.unlogged, lo.coal.pw$est.unlogged, lo.pt.pw$est.unlogged, ply.all$est.unlogged, ply.all.pw$est.unlogged, ply.coal.pw$est.unlogged, ply.pt.pw$est.unlogged, ll.all$est.unlogged, ll.all.pw$est.unlogged, ll.coal.pw$est.unlogged, ll.pt.pw$est.unlogged),
+  c(lo.all$donations, lo.all.pw$donations, lo.coal.pw$donations, lo.pt.pw$donations, ply.all$donations, ply.all.pw$donations, ply.coal.pw$donations, ply.pt.pw$donations, ll.all$donations, ll.all.pw$donations, ll.coal.pw$donations, ll.pt.pw$donations),
+  c(lo.all$N, lo.all.pw$N, lo.coal.pw$N, lo.pt.pw$N, ply.all$N, ply.all.pw$N, ply.coal.pw$N, ply.pt.pw$N, ll.all$N, ll.all.pw$N, ll.coal.pw$N, ll.pt.pw$N)
+))
+
+
+names(dnit.results.table) <- c("$\\tau_{RD}$", "SE", "$\\tau_{RD}$, unlogged", "Mean Donation" , "N"  )
+bottom.note <- paste("Dependent variable is the log of the average value of contracts (plus one) issued by DNIT that are received by a candidate's corporate donors, January 2008--September 2010. ``Coalition'' candidates are those from the PMDB, PP, PV, PSB, PC do B, PDT, PL, and PRONA in 2006. The unlogged treatment effect is given by $exp(E[Y_{ij}(1)|M_{ij} =0]) - exp(E[Y_{ij}(0)|M_{ij} =0])$. ``Mean Donation'' is the estimated donation per firm for candidates at the discontinuity.  The loess specification uses a bandwidth of ", prettyNum(lo.bw, big.mark = ",", scientific = FALSE), " votes and a span of ", span, ". The local linear and polynomial specifications use bandwidths of ", prettyNum(ll.bw, big.mark = ",", scientific = FALSE), " and ", prettyNum(ply.bw, big.mark = ",", scientific = FALSE), " votes, respectively.  Loess standard errors are bootstrapped; others are heteroskedasticity-robust.", sep = "")
+
+#Note: The following command creates a latex table that can only be compiled when using the "ctable" latex package. 
+#Note: The results in this latex table correspond to the results in the right half of Table 1 
+dnit.results.table.latex <- latex(dnit.results.table, cdec = c(2, 2, 0, 0, 0), file = "table1_dnit_contracts.tex", col.just = rep("c", 5), rowname = c("All", "Pub. works donations", "Pub. works, coalition", "Pub. works, PT", "All", "Pub. works donations", "Pub. works, coalition", "Pub. works, PT", "All", "Pub. works donations", "Pub. works, coalition", "Pub. works, PT" ), rowlabel = "Sample", caption = "The Effect of Electoral Victory on Future Contracts from the National Department of Transportation Infrastructure (DNIT).", insert.bottom = bottom.note, rgroup = c("Loess Estimator", "Polynomial Estimator", "Local Linear Estimator"), n.rgroup = c(4, 4, 4 ), booktabs = FALSE, ctable = TRUE, where = "htp")
+
+```
+
+
+
+```{r McCary density test, include=FALSE}
+mccrary.all.raw <- with(lo.all.data, mccrary.test(force.var = votemargin))
+mccrary.pw.raw <- with(lo.all.pw.data, mccrary.test(force.var = votemargin))
+mccrary.pw.pt.raw <- with(lo.pt.pw.data, mccrary.test(force.var = votemargin))
+mccrary.pw.coal.raw <- with(lo.coal.pw.data, mccrary.test(force.var = votemargin))
+
+depfed.mccrary.table.raw <- cbind(
+  "All" = c(unlist(mccrary.all.raw), nrow(lo.all.data)),
+  "Pub. works" = c(unlist(mccrary.pw.raw), nrow(lo.all.pw.data)),
+  "Pub. works, coalition" = c(unlist(mccrary.pw.coal.raw), nrow(lo.coal.pw.data)),
+  "Pub. works, PT" = c(unlist(mccrary.pw.pt.raw), nrow(lo.pt.pw.data)) 
+)
+
+depfed.mccrary.table.raw.latex <- latex(depfed.mccrary.table.raw, rdec = c(2, 2, 0), col.just = rep("c", 4), rowname = c("Wald Stat." , "SE", "N"), rowlabel = "", caption = "McCrary Test of Continuity of the Forcing Variable: Federal Deputies", ctable = TRUE, file = "appendix_table1.tex", where = "htp")
+
+```
+
+```{r histogram of forcing variable, include=FALSE}
+
+pdf(file = "appendix_figure1.pdf", width = 6, height = 6)
+with(lo.all.data,
+     hist(x = votemargin,
+          breaks = seq(-40000, 40000, 2000),
+          freq = TRUE,
+          #          labels = TRUE,
+          right = FALSE,
+          xlim = c(-40000, 40000),
+          ylim = c(0, 35),
+          col = "grey",
+          main = NULL,
+          xlab = "Raw Vote Margin",
+          ylab = "Frequency Count in 2000 Vote Bins",
+          las = 1,
+          #          cex.lab = 1.2,
+          #          cex.main = 1.3
+     )
+)
+abline(v = 0, lwd = 2, lty=2)
+dev.off()
+
 
 ```
 
