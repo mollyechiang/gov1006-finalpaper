@@ -237,6 +237,179 @@ ply.all.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & d
 ply.coal.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$pw.donations>0 & depfed.balance$party %in% c('PMDB','PP','PV','PSB','PC do B','PDT','PL','PRONA'),]
 ply.pt.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin) < ply.bw & depfed.balance$pw.donations>0 & depfed.balance$party == "PT",]
 
+```
+
+```{r fig 1 balance tests}
+
+bal.var <- c("coalvotes", "incumbent", "contracts.0406", "pw.con.0406", "donations", "pw.donations", "donor.firms", "pw.donor.firms", "year.opened", "commerce", "manufacture", "financial", "cand.uf.sp", "cand.uf.mg", "cand.uf.rs", "cand.uf.ba", "cand.uf.rj", "party.psdb", "party.pfl", "party.pt", "party.pmdb", "superior.edu", "occ.pol", "yob", "individ.donations", "occ.business", "coalvotes", "individual.donors", "coalseats", "agriculture", "numb.company.recipients", "total.company.donations", "totalDonations.winners.firm", "winners.donated.to")
+
+
+lo.bal <- list()
+lo.bal$all <- list()
+lo.bal$all.pw <- list()
+lo.bal$coal.pw <- list()
+lo.bal$pt.pw <- list()
+
+ll.bal <- list()
+ll.bal$all <- list()
+ll.bal$all.pw <- list()
+ll.bal$coal.pw <- list()
+ll.bal$pt.pw <- list()
+length(ll.bal$pt.pw) <- length(bal.var)
+
+ply.bal <- list()
+ply.bal$all <- list()
+ply.bal$all.pw <- list()
+ply.bal$coal.pw <- list()
+ply.bal$pt.pw <- list()
+length(ply.bal$pt.pw) <- length(bal.var)
+
+for(i in 1:length(bal.var)){
+  print(paste("Checking Balance on", bal.var[i]))
+  lo.bal$all[[i]] <- with(lo.all.baldata, lo.ate(y = lo.all.baldata[ , bal.var[i]], treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+  lo.bal$all[[i]]$sd <- (sd(lo.all.baldata[lo.all.baldata$elected == 1 , bal.var[i]]) + sd(lo.all.baldata[lo.all.baldata$elected == 0 , bal.var[i]])) / 2
+  names(lo.bal$all)[i] <- bal.var[i]
+  
+  lo.bal$all.pw[[i]] <- with(lo.all.pw.baldata, lo.ate(y = lo.all.pw.baldata[, bal.var[i]], treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+  lo.bal$all.pw[[i]]$sd <- (sd(lo.all.pw.baldata[lo.all.pw.baldata$elected == 1 , bal.var[i]]) + sd(lo.all.pw.baldata[lo.all.pw.baldata$elected == 0 , bal.var[i]])) / 2
+  names(lo.bal$all.pw)[i] <- bal.var[i]
+  
+  if(length(unique(lo.coal.pw.baldata[ , bal.var[i]])) == 1){
+    lo.bal$coal.pw[[i]] <- NA
+  }
+  if(length(unique(lo.coal.pw.baldata[ , bal.var[i]])) > 1){
+    lo.bal$coal.pw[[i]] <- with(lo.coal.pw.baldata, lo.ate(y = lo.coal.pw.baldata[, bal.var[i]], treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+    lo.bal$coal.pw[[i]]$sd <- (sd(lo.coal.pw.baldata[lo.coal.pw.baldata$elected == 1 , bal.var[i]]) + sd(lo.coal.pw.baldata[lo.coal.pw.baldata$elected == 0 , bal.var[i]])) / 2  
+  }
+  names(lo.bal$coal.pw)[i] <- bal.var[i]
+  
+  if(length(unique(lo.pt.pw.baldata[ , bal.var[i]])) == 1){
+    lo.bal$pt.pw[[i]] <- NA
+  }
+  if(length(unique(lo.pt.pw.baldata[ , bal.var[i]])) > 1){
+    lo.bal$pt.pw[[i]] <- with(lo.pt.pw.baldata, lo.ate(y = lo.pt.pw.baldata[, bal.var[i]], treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+    lo.bal$pt.pw[[i]]$sd <- (sd(lo.pt.pw.baldata[lo.pt.pw.baldata$elected == 1 , bal.var[i]]) + sd(lo.pt.pw.baldata[lo.pt.pw.baldata$elected == 0 , bal.var[i]])) / 2
+  }
+  names(lo.bal$pt.pw)[i] <- bal.var[i]
+  
+  ll.bal$all[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected*votemargin")) , data = ll.all.baldata), type = "hc2")
+  ll.bal$all[[i]]$sd <- (sd(ll.all.baldata[ll.all.baldata$elected == 1, bal.var[i]]) + sd(ll.all.baldata[ll.all.baldata$elected == 0, bal.var[i]])) / 2
+  names(ll.bal$all)[i] <- bal.var[i]
+  
+  ll.bal$all.pw[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected*votemargin")) , data = ll.all.pw.baldata), type = "hc2")
+  ll.bal$all.pw[[i]]$sd <- (sd(ll.all.pw.baldata[ll.all.pw.baldata$elected == 1, bal.var[i]]) + sd(ll.all.pw.baldata[ll.all.pw.baldata$elected == 0, bal.var[i]])) / 2
+  names(ll.bal$all.pw)[i] <- bal.var[i]
+  
+  if(length(unique(ll.coal.pw.baldata[ , bal.var[i]])) == 1){
+    ll.bal$coal.pw[[i]] <- NA
+  }
+  if(length(unique(ll.coal.pw.baldata[ , bal.var[i]])) > 1){
+    ll.bal$coal.pw[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected*votemargin")) , data = ll.coal.pw.baldata), type = "hc2")
+    ll.bal$coal.pw[[i]]$sd <- (sd(ll.coal.pw.baldata[ll.coal.pw.baldata$elected == 1, bal.var[i]]) + sd(ll.coal.pw.baldata[ll.coal.pw.baldata$elected == 0, bal.var[i]])) / 2
+  }
+  names(ll.bal$coal.pw)[i] <- bal.var[i]
+  
+  if(length(unique(ll.pt.pw.baldata[ , bal.var[i]])) == 1){
+    ll.bal$pt.pw[[i]] <- NA
+  }
+  if(length(unique(ll.pt.pw.baldata[ , bal.var[i]])) > 1){
+    ll.bal$pt.pw[[i]] <- tryCatch(summaryR.lm(lm(formula(paste(bal.var[i], "~ elected*votemargin")) , data = ll.pt.pw.baldata), type = "hc2"), error = function(e) NA)
+    if(is.na(ll.bal$pt.pw[[i]][1]) == FALSE){
+      ll.bal$pt.pw[[i]]$sd <- (sd(ll.pt.pw.baldata[ll.pt.pw.baldata$elected == 1, bal.var[i]]) + sd(ll.pt.pw.baldata[ll.pt.pw.baldata$elected == 0, bal.var[i]])) / 2
+    }
+  }
+  names(ll.bal$pt.pw)[i] <- bal.var[i]  
+  ply.bal$all[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.all.baldata), type = "hc2")
+  ply.bal$all[[i]]$sd <- (sd(ply.all.baldata[ply.all.baldata$elected == 1, bal.var[i]]) + sd(ply.all.baldata[ply.all.baldata$elected == 0, bal.var[i]])) / 2
+  names(ply.bal$all)[i] <- bal.var[i]
+  
+  ply.bal$all.pw[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.all.pw.baldata), type = "hc2")
+  ply.bal$all.pw[[i]]$sd <- (sd(ply.all.pw.baldata[ply.all.pw.baldata$elected == 1, bal.var[i]]) + sd(ply.all.pw.baldata[ply.all.pw.baldata$elected == 0, bal.var[i]])) / 2
+  names(ply.bal$all.pw)[i] <- bal.var[i]
+  
+  if(length(unique(ply.coal.pw.baldata[ , bal.var[i]])) == 1){
+    ply.bal$coal.pw[[i]] <- NA
+  }
+  if(length(unique(ply.coal.pw.baldata[ , bal.var[i]])) > 1){
+    ply.bal$coal.pw[[i]] <- summaryR.lm(lm(formula(paste(bal.var[i], "~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.coal.pw.baldata), type = "hc2")
+    ply.bal$coal.pw[[i]]$sd <- (sd(ply.coal.pw.baldata[ply.coal.pw.baldata$elected == 1, bal.var[i]]) + sd(ply.coal.pw.baldata[ply.coal.pw.baldata$elected == 0, bal.var[i]])) / 2
+  }
+  names(ply.bal$coal.pw)[i] <- bal.var[i]
+  
+  if(length(unique(ply.pt.pw.baldata[ , bal.var[i]])) == 1){
+    ply.bal$pt.pw[[i]] <- NA
+  }
+  if(length(unique(ply.pt.pw.baldata[ , bal.var[i]])) > 1){
+    ply.bal$pt.pw[[i]] <- tryCatch(summaryR.lm(lm(formula(paste(bal.var[i], "~ elected * votemargin + ", paste("I(votemargin^", 2:poly.order, ") * elected", sep ="", collapse = " + "))) , data = ply.pt.pw.baldata), type = "hc2"), error = function(e) NA)
+    if(is.na(ply.bal$pt.pw[[i]][1]) == FALSE){
+      ply.bal$pt.pw[[i]]$sd <- (sd(ply.pt.pw.baldata[ply.pt.pw.baldata$elected == 1, bal.var[i]]) + sd(ply.pt.pw.baldata[ply.pt.pw.baldata$elected == 0, bal.var[i]])) / 2
+    }
+  }
+  names(ply.bal$pt.pw)[i] <- bal.var[i]
+  
+}
+
+lo.bal <- lapply(lo.bal, function(x){x[is.na(x)] <- NULL; x})
+ll.bal <- lapply(ll.bal, function(x){x[is.na(x)] <- NULL; x})
+ply.bal <- lapply(ply.bal, function(x){x[is.na(x)] <- NULL; x})
+std.diff.table <- data.frame(Estimate = c(
+  ldply(lo.bal, function(x) ldply(x, function(x) x$est))$V1,
+  ldply(ply.bal, function(x) ldply(x, function(x) coef(x)[2,1]))$V1,
+  ldply(ll.bal, function(x) ldply(x, function(x) coef(x)[2,1]))$V1),
+                             SD = c(
+                               ldply(lo.bal, function(x) ldply(x, function(x) x$sd))$V1,
+                               ldply(ply.bal, function(x) ldply(x, function(x) x$sd))$V1,
+                               ldply(ll.bal, function(x) ldply(x, function(x) x$sd))$V1),
+                             Variable = c(
+                               ldply(lo.bal, function(x) ldply(x, function(x) x$sd))$.id,
+                               ldply(ply.bal, function(x) ldply(x, function(x) x$sd))$.id,
+                               ldply(ll.bal, function(x) ldply(x, function(x) x$sd))$.id),  
+                             Sample = c(rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), sapply(lo.bal, length)), 
+                                        rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), 
+                                            sapply(ply.bal, length)),
+                                        rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), sapply(ll.bal, length))
+                             ),
+                             Estimator = c(
+                               rep("Loess", sum(sapply(lo.bal, length))), 
+                               rep("Polynomial", sum(sapply(ply.bal, length))), rep("Local Linear", sum(sapply(ll.bal, length))))
+)
+std.diff.table$std.diff <- std.diff.table$Estimate / std.diff.table$SD
+std.diff.table$Variable <- reorder(std.diff.table$Variable, std.diff.table$std.diff, mean)
+
+tstat.table <- data.frame(Estimate = c(
+  ldply(lo.bal, function(x) ldply(x, function(x) x$est))$V1,
+  ldply(ply.bal, function(x) ldply(x, function(x) coef(x)[2,1]))$V1,
+  ldply(ll.bal, function(x) ldply(x, function(x) coef(x)[2,1]))$V1),
+                          SE = c(
+                            ldply(lo.bal, function(x) ldply(x, function(x) x$se))$V1,
+                            ldply(ply.bal, function(x) ldply(x, function(x) coef(x)[2,2]))$V1,
+                            ldply(ll.bal, function(x) ldply(x, function(x) coef(x)[2,2]))$V1),
+                          Variable = c(
+                            ldply(lo.bal, function(x) ldply(x, function(x) x$sd))$.id,
+                            ldply(ply.bal, function(x) ldply(x, function(x) x$sd))$.id,
+                            ldply(ll.bal, function(x) ldply(x, function(x) x$sd))$.id),  
+                          Sample = c(
+                            rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), sapply(lo.bal, length)), 
+                            rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), sapply(ply.bal, length)),
+                            rep(c("All", "Public Works", "Public Works, Coalition", "Public Works, PT"), sapply(ll.bal, length))
+                          ),
+                          Estimator = c(
+                            rep("Loess", sum(sapply(lo.bal, length))),
+                            rep("Polynomial", sum(sapply(ply.bal, length))), rep("Local Linear", sum(sapply(ll.bal, length))))
+)
+tstat.table$tstat <- abs(tstat.table$Estimate / tstat.table$SE)
+tstat.table$Variable <- reorder(tstat.table$Variable, tstat.table$tstat, max)
+
+std.diff.table$Variable <- recode(std.diff.table$Variable, c("'coalvotes' = 'Coalition Votes'; 'yob' = 'Birth Year'; 'comm.donations' = 'Party Donations'; 'incumbent' = 'Incumbent'; 'contracts.0406' = 'Contracts (\\'04-\\'06)'; 'pw.con.0406' = 'Public Works Contracts (\\'04-\\'06)'; 'donations' = 'Total Donations Received'; 'pw.donations' = 'Public Works Donations Received'; 'donor.firms' = 'No. Donor Firms'; 'pw.donor.firms' = 'Percent Public Works Donors'; 'year.opened' = 'Mean Donor Year Founded'; 'commerce' = 'Percent Commerce Donors'; 'manufacture' = 'Percent Manufacturing Donors'; 'financial' = 'Percent Financial Donors'; 'agriculture' = 'Percent Agricultural Donors'; 'cand.uf.sp' = 'State - São Paulo'; 'cand.uf.mg' = 'State - Minas Gerais';  'cand.uf.rs' = 'State - Rio Grande do Sul'; 'superior.edu' = 'Higher Education'; 'occ.pol' = 'Occupation - Politician'; 'individ.donations' = 'Individual Donations'; 'numb.company.recipients' = 'Mean Donor No. Candidate Recipients'; 'party.pmdb' = 'Party - PMDB'; 'party.pfl' = 'Party - PFL'; 'total.company.donations' = 'Mean Donor Total Donations'; 'coalvotes' = 'Coalition Votes'; 'party.pt' = 'Party - PT'; 'party.psdb' = 'Party - PSDB'; 'occ.business' = 'Occupation - Business'; 'cand.uf.rj' = 'State - Rio de Janeiro'; 'cand.uf.ba' = 'State - Bahia'; 'coalseats' = 'Coalition Seats'; 'individual.donors' = 'No. Individual Donors'; 'totalDonations.winners.firm' = 'Mean Donor Donations to Winners'; 'winners.donated.to' = 'Mean Donor No. Winning Recipients'"))
+
+tstat.table$Variable <- recode(tstat.table$Variable, c("'coalvotes' = 'Coalition Votes'; 'yob' = 'Birth Year'; 'comm.donations' = 'Party Donations'; 'incumbent' = 'Incumbent'; 'contracts.0406' = 'Contracts (\\'04-\\'06)'; 'pw.con.0406' = 'Public Works Contracts (\\'04-\\'06)'; 'donations' = 'Total Donations Received'; 'pw.donations' = 'Public Works Donations Received'; 'donor.firms' = 'Donor Firms'; 'pw.donor.firms' = 'Percent Public Works Donors'; 'year.opened' = 'Mean Donor Year Founded'; 'commerce' = 'Percent Commerce Donors'; 'manufacture' = 'Percent Manufacturing Donors'; 'financial' = 'Percent Financial Donors'; 'agriculture' = 'Percent Agricultural Donors'; 'cand.uf.sp' = 'State - São Paulo'; 'cand.uf.mg' = 'State - Minas Gerais';  'cand.uf.rs' = 'State - Rio Grande do Sul'; 'superior.edu' = 'Higher Education'; 'occ.pol' = 'Occupation - Politician'; 'individ.donations' = 'Individual Donations'; 'numb.company.recipients' = 'Mean Donor Candidate Recipients'; 'party.pmdb' = 'Party - PMDB'; 'party.pfl' = 'Party - PFL'; 'total.company.donations' = 'Mean Donor Total Donations'; 'coalvotes' = 'Coalition Votes'; 'party.pt' = 'Party - PT'; 'party.psdb' = 'Party - PSDB'; 'occ.business' = 'Occupation - Business'; 'cand.uf.rj' = 'State - Rio de Janeiro'; 'cand.uf.ba' = 'State - Bahia'; 'coalseats' = 'Coalition Seats'; 'individual.donors' = 'Individual Donors'; 'totalDonations.winners.firm' = 'Mean Donor Donations to Winners'; 'winners.donated.to' = 'Mean Donor Winning Recipients'"))
+
+levels(std.diff.table$Sample) <- c("All", "Public Works", "Public Works, Coalition", "Public Works, PT")
+
+levels(tstat.table$Sample) <- c("All", "Public Works", "Public Works, Coalition", "Public Works, PT")
+pdf(file = "figure1.pdf", height = 6, width = 10)
+ggplot(tstat.table, aes(x = tstat, y = Variable, shape = Sample, color = Sample)) + geom_point() + geom_vline(xintercept = 2, lty = 2, size = .2) + facet_grid(.~Estimator) + theme_bw() + scale_x_continuous("T Statistic") + scale_color_brewer(palette = "Set1") + labs(title = "Balance Statistics for Federal Deputies") 
+dev.off()
 
 ```
 
