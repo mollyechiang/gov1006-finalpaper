@@ -176,3 +176,17 @@ lo.degree <- 1
 
 ```
 
+```{r datasets of varioius samples, include=FALSE}
+
+depfed_data$incumbent <- depfed.balance$incumbent
+depfed_data$uf.sp <- ifelse(depfed_data$uf == "SP", 1, 0)
+depfed_data$uf.mg <- ifelse(depfed_data$uf == "MG", 1, 0)
+##Loess Data, Estimation Samples
+lo.bw <- 40000
+lo.all.data <- depfed_data[abs(depfed_data$votemargin)<lo.bw & depfed_data$donations>0,]
+lo.all.pw.data <- depfed_data[abs(depfed_data$votemargin)<lo.bw & depfed_data$pw.donations>0,]
+lo.coal.pw.data <- depfed_data[abs(depfed_data$votemargin)<lo.bw & depfed_data$pw.donations>0 & depfed_data$party %in% c('PMDB','PP','PV','PSB','PC do B','PDT','PL','PRONA'),]
+lo.pt.pw.data <- depfed_data[abs(depfed_data$votemargin)<lo.bw & depfed_data$pw.donations>0 & depfed_data$party == "PT",]
+
+```
+
