@@ -90,3 +90,34 @@ discont.plot <- function(y, force.var, cluster, treat,  span = .7, n.boots = 100
 
 ```
 
+```{r loess estimating treatment effect function, include=FALSE}
+
+boot.loess <- function(data, index, span = .75, degree = 2){
+  boot.data <- data[index,]
+  lo.treat <- loess(y~force.var, data = boot.data[boot.data$treat==1,], span=span, surface="direct", degree = degree)
+  lo.cont <- loess(y~force.var, data = boot.data[boot.data$treat==0,], span=span, surface="direct", degree = degree)
+  lo.fit.tr <- predict(lo.treat, newdata = 0, se = TRUE)
+  lo.fit.co <- predict(lo.cont, newdata = 0, se = TRUE)
+  c(lo.fit.tr$fit-lo.fit.co$fit, var.t = lo.fit.tr$se.fit + lo.fit.co$se.fit)
+}
+
+lo.ate <- function(y, treat, force.var, span = 1, R = 500, degree = 2, replicates = FALSE){
+  library(boot)
+  data <- data.frame(y, treat, force.var)
+  boot.out <- boot(data = data, span = span, statistic = boot.loess, R  = R)
+  ci.out <- boot.ci(boot.out, type = "stud")
+  lo.treat <- loess(y~force.var, data = data[data$treat==1,], span=span, surface="direct", degree = degree)
+  lo.cont <- loess(y~force.var, data = data[data$treat==0,], span=span, surface="direct", degree = degree)
+  lo.fit.tr <- predict(lo.treat, newdata = 0)
+  lo.fit.co <- predict(lo.cont, newdata = 0)
+  if(replicates == TRUE){
+    list(est = lo.fit.tr - lo.fit.co, se = sd(boot.out$t[,1]), conf.int = c(ci.out$student[4], ci.out$student[5]), tr.est = lo.fit.tr, con.est = lo.fit.co, boot.replicates = boot.out$t[,1])
+  }
+  else{
+    list(est = lo.fit.tr - lo.fit.co, se = sd(boot.out$t[,1]), conf.int = c(ci.out$student[4], ci.out$student[5]), tr.est = lo.fit.tr, con.est = lo.fit.co)    
+  }
+}
+
+
+```
+
