@@ -169,3 +169,10 @@ num.boots <- 1000
 
 ```
 
+```{r parameters for loess estimator, include=FALSE}
+
+span <- 1
+lo.degree <- 1
+
+```
+
