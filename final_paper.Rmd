@@ -437,3 +437,15 @@ lo.all.pw$N <- nrow(lo.all.pw.data)
 
 ```
 
+```{r public works coalition, include=FALSE}
+
+lo.coal.pw <- with(lo.coal.pw.data, lo.ate(y = log((pw.con.0810 + 1)/pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.coal.pw$est.unlogged <- reais.format(exp(lo.coal.pw$tr.est) - exp(lo.coal.pw$con.est))
+lo.coal.pw$num.donors <- with(lo.coal.pw.data, lo.ate(y = log(pw.donor.firms), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.coal.pw$num.donors <- mean(exp(lo.coal.pw$num.donors$tr.est), exp(lo.coal.pw$num.donors$con.est))
+lo.coal.pw$donations <- with(lo.coal.pw.data , lo.ate(y = log(pw.donations), treat = elected, force.var = votemargin, span = span, R = num.boots, degree = lo.degree))
+lo.coal.pw$donations <- reais.format(mean(exp(lo.coal.pw$donations$tr.est) , exp(lo.coal.pw$donations$con.est)) / lo.coal.pw$num.donors)
+lo.coal.pw$N <- nrow(lo.coal.pw.data)
+
+```
+
