@@ -199,3 +199,14 @@ lo.pt.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin)<lo.bw & depfed
 
 ```
 
+```{r local linear bindwith, include=FALSE}
+
+ll.bw <- 25000
+##Local Linear Data, Estimation Samples
+ll.all.data <- depfed_data[abs(depfed_data$votemargin) < ll.bw & depfed_data$donations > 0,]
+ll.all.pw.data <- depfed_data[abs(depfed_data$votemargin)<ll.bw & depfed_data$pw.donations>0,]
+ll.coal.pw.data <- depfed_data[abs(depfed_data$votemargin)<ll.bw & depfed_data$pw.donations>0 & depfed_data$party %in% c('PMDB','PP','PV','PSB','PC do B','PDT','PL','PRONA'),]
+ll.pt.pw.data <- depfed_data[abs(depfed_data$votemargin)<ll.bw & depfed_data$pw.donations>0 & depfed_data$party == "PT",]
+
+```
+
