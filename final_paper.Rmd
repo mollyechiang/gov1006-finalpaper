@@ -19,7 +19,7 @@ library(dplyr)
 
 ```
 
-```{r loading data}
+```{r loading data, include=FALSE}
 
 set.seed(13)
 load("raw-data/spoils_of_victory_replication_data.RData")
@@ -28,7 +28,26 @@ options(warn = -1)
 
 ```
 
-```{r}
+```{r heteroskedastically robust SE function, include=FALSE}
+
+summaryR.lm <- function(model, type=c("hc3", "hc0", "hc1", "hc2", "hc4"), ...){
+  if (!require(car)) stop("Required car package is missing.")
+  type <- match.arg(type)
+  V <- hccm(model, type=type)
+  sumry <- summary(model)
+  table <- coef(sumry)
+  table[,2] <- sqrt(diag(V))
+  table[,3] <- table[,1]/table[,2]
+  table[,4] <- 2*pt(abs(table[,3]), df.residual(model), lower.tail=FALSE)
+  sumry$coefficients <- table
+  p <- nrow(table)
+  hyp <- cbind(0, diag(p - 1))
+  sumry
+}
+
+reais.format <- function(x){
+  paste("R\\$", prettyNum(round(x), big.mark = ","), sep =" ")
+}
 
 ```
 
