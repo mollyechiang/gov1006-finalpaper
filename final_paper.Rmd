@@ -8,15 +8,27 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 
-library(foreign)
+library(Hmisc)
 library(ggplot2)
+library(reshape)
+library(AER)
 library(grid)
-library(gridExtra)
+library(plyr)
+library(tidyverse)
+library(dplyr)
+
 ```
 
-```{r importing data for 1994 table}
+```{r loading data}
 
-d <- read.dta("raw-data/idasa_1994_ddk12.dta")
+set.seed(13)
+load("raw-data/spoils_of_victory_replication_data.RData")
+
+options(warn = -1)
+
+```
+
+```{r}
 
 ```
 
