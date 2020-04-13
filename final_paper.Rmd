@@ -190,3 +190,12 @@ lo.pt.pw.data <- depfed_data[abs(depfed_data$votemargin)<lo.bw & depfed_data$pw.
 
 ```
 
+```{r loess balance samples, include=FALSE}
+
+lo.all.baldata <- depfed.balance[abs(depfed.balance$votemargin)<lo.bw & depfed.balance$donations>0,]
+lo.all.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin)<lo.bw & depfed.balance$pw.donations>0,]
+lo.coal.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin)<lo.bw & depfed.balance$pw.donations>0 & depfed.balance$party %in% c('PMDB','PP','PV','PSB','PC do B','PDT','PL','PRONA'),]
+lo.pt.pw.baldata <- depfed.balance[abs(depfed.balance$votemargin)<lo.bw & depfed.balance$pw.donations>0 & depfed.balance$party == "PT",]
+
+```
+
