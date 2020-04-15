@@ -586,7 +586,7 @@ depfed.balance$pw.donations > 0 & depfed.balance$party == "PT", ]
 
 ```
 
-```{r fig 1 balance tests}
+```{r fig 1 balance tests, include=FALSE}
 bal.var <-
 c(
 "coalvotes",
@@ -627,7 +627,7 @@ c(
 ```
 
 
-```{r fig 1 balance tests}
+```{r fig 1 balance tests 2, include=FALSE}
 lo.bal <- list()
 lo.bal$all <- list()
 lo.bal$all.pw <- list()
