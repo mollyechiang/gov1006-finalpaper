@@ -7,5 +7,22 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+
+  library(foreign)
+  library(lmtest)
+  library(sandwich)
+  library(Matching)
+  library(ebal)
+  library(memisc)
+  library(ggplot2)
+  library(sp)
+  library(maptools) 
+  library(rgdal) 
+  library(rgeos)
+  library(AER)
+  library(plyr)
+  library(scales) 
+  library(RColorBrewer)
+
 ```
 
