@@ -33,7 +33,11 @@ This paper by Taylor C. Boas, F. Daniel Hidalgo, and Neal P. Richardson uses dat
 The next step to this project was replicating Boas, Hidalgo and Richardson's code. Their code and data are publically available on Harvard Dataverse. In order to replicate the results, I ran their original code with minor modifications in R. All code for replication is available on my Github repository ^[GitHub repository: https://github.com/chelseamarlborough/gov1006-milestone4]. 
 
 ### Literature Review
+This paper was written in response to prior studies that were deemed exclusionary in analyzing outcomes of donation money to candidates of public office due to methodoligcal challenges and distinct U.S. political feature focus. In 1937, Carl Joachim Friedrich, Harvard University government professor, claimed that the spoils system was in decline and moving towards distinction within the U.S. political system (Friedrich 1937). 
 
+David M. Trubek, Diogo R. Coutinho, and Mario Gomes Shapiro agree that a similar trend was occuring within Brazil that until the 1930's goverment contracts were being made through a spoils system and argued that the 1988 Constitution implemented significant reform capping state salaries and employees to be selected through meritocratic processes (Trubek, Coutinho & Schapiro 2012).
+
+However, Boas, Hidalgo, and Richardson's paper is one of the first to address the relationship between firm donations to public policy outcomes by ruling-party candidates within Brazil. With the suport of public Brazilian government records and similar findings by Paulo Roberto Arvate, Klenio Barbosa, and Eric Fuzitanit in 2013, their findings are further affirmed. ^[Arvate, Paulo, et al. “Campaign Donation and Government Contracts in Brazilian States.” IDEAS Working Paper Series from RePEc, 2013, pp. IDEAS Working Paper Series from RePEc, 2013.] 
 
 
 ### Tables and Figures
@@ -2339,4 +2343,4 @@ where = "htp"
 ```
 
 # References 
-[@boas2014spoils]
+[@boas2014spoils, @friedrich1937rise, @trubek2012towards, @arvate2013campaign]
