@@ -865,3 +865,45 @@ overlaps <- read.csv("precincts0711.csv", stringsAsFactors=FALSE, na.strings=c("
 
 ```
 
+```{r figure 6}
+
+  d2011 <- divisions[which(divisions$year==2011),]
+  d2003 <- divisions[which(divisions$year==2003),]
+  
+  # Left side of figure, 2003 liberal party voteshare
+  mt <- mean(d2003$perc_lib[which(d2003$treat_p==1)])
+  mc <- mean(d2003$perc_lib[which(d2003$treat_p==0)])
+  df.hlines <- data.frame(treat_p=c("0","1"), hline=c(mc,mt))
+  df.hlines
+  
+  plot <- ggplot(d2003, aes(x=as.factor(treat_p), y=perc_lib, fill=as.factor(treat_p))) + geom_point(alpha = 0.55, position='jitter', size=1.5) + scale_fill_brewer(palette="Set1") # Given jitter and alpha (density of points) the plots will vary slightly with each creation.
+  
+  plot + geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline), colour="blue") + 
+    theme(legend.position="none", axis.text.x = element_text(size=13), axis.text.y = element_text(size=13)) + 
+    scale_y_continuous(name="Liberal Party Vote Share", limits=c(0,0.8)) + 
+    scale_x_discrete(labels=c("control", "treated"), name="") + 
+    coord_flip() + 
+    #opts(axis.text.y = theme_text(size = 12), axis.text.x = theme_text(size = 12)) + 
+    ggtitle("2003")
+  
+  
+  # Right side of figure, 2011 liberal party voteshare
+  mt <- mean(d2011$perc_lib[which(d2011$prop==1)])
+  mc <- mean(d2011$perc_lib[which(d2011$prop==0)])
+  
+  df.hlines <- data.frame(prop=c("0","1"), hline=c(mc,mt))
+  df.hlines
+  
+  plot <- ggplot(d2011, aes(x=as.factor(prop), y=perc_lib, fill=as.factor(prop))) + geom_point(alpha = 0.55, size=1.5, position='jitter') + scale_fill_brewer(palette="Set1")
+  
+  plot + geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline, xmax=1), colour="blue") + 
+    theme(legend.position="none", axis.ticks.y=element_blank(), axis.text.x = element_text(size=13), axis.text.y = element_text(size=13)) + 
+    scale_y_continuous(name="Liberal Party Vote Share", breaks=c(0.0, 0.2, 0.4, 0.6, 0.8, 1), limits=c(0,0.8)) + 
+    scale_x_discrete(labels="", name="") + 
+    coord_flip() + 
+    ggtitle("2011")
+  
+  rm(d2003, d2011, df.hlines, mc, mt, plot)
+
+```
+
