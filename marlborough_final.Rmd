@@ -523,3 +523,15 @@ yx_data <- divisions[,c("perc_lib_fed","prop")]
 
 ```
 
+```{r table 6}
+
+d2003 <- divisions[which(divisions$year==2003),]
+  mb <- MatchBalance(treat_p_3km ~ perc_lib + p_uni_degree + log_median_inc + avg_home_val + log_pop_denc, data=d2003, ks=T) 
+  table <- baltest.collect(matchbal.out=mb, var.names=c("Liberal Vote Share", "Highest Degree Uni %",  "Median Income (log)", "Average value of home", "Population density (log)"), after=F)
+  round(table, 3)
+  
+rm(mb, table)
+
+
+```
+
