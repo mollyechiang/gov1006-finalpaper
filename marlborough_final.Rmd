@@ -158,3 +158,77 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE, conf.i
 
 ```
 
+```{r missing data, include = FALSE}
+
+dt <- divisions
+  
+  # Shows the amount 
+  length(which(is.na(dt$log_pop))) / nrow(dt) #1%
+  length(which(is.na(dt$log_pop_denc))) / nrow(dt) #1%
+  length(which(is.na(dt$log_median_inc))) / nrow(dt) #4%
+  length(which(is.na(dt$avg_home_val_log))) / nrow(dt) #3%
+  length(which(is.na(dt$unemploy_rate))) / nrow(dt) #3%
+  length(which(is.na(dt$p_uni_degree))) / nrow(dt) #2%
+  length(which(is.na(dt$p_immigrant))) / nrow(dt) #2%
+  length(which(is.na(dt$p_housing_own))) / nrow(dt) #2%
+  
+  #subset the data by year
+  d2007 <- dt[which(dt$year==2007),]
+  d2011 <- dt[which(dt$year==2011),]
+  d2003 <- dt[which(dt$year==2003),]
+  
+  # Eliminate missing data by setting missing values equal to the mean for each year and variable
+  d2007$log_pop_denc[which(is.na(d2007$log_pop_denc))] <- mean(d2007$log_pop_denc, na.rm=T)
+  d2007$log_pop[which(is.na(d2007$log_pop))] <- mean(d2007$log_pop, na.rm=T)
+  d2007$log_median_inc[which(is.na(d2007$log_median_inc))] <- mean(d2007$log_median_inc, na.rm=T)
+  d2007$avg_home_val_log[which(is.na(d2007$avg_home_val_log))] <- mean(d2007$avg_home_val_log, na.rm=T)
+  d2007$avg_home_val[which(is.na(d2007$avg_home_val))] <- mean(d2007$avg_home_val, na.rm=T)
+  d2007$unemploy_rate[which(is.na(d2007$unemploy_rate))] <- mean(d2007$unemploy_rate, na.rm=T)
+  d2007$p_uni_degree[which(is.na(d2007$p_uni_degree))] <- mean(d2007$p_uni_degree, na.rm=T)
+  d2007$p_immigrant[which(is.na(d2007$p_immigrant))] <- mean(d2007$p_immigrant, na.rm=T)
+  d2007$p_housing_own[which(is.na(d2007$p_housing_own))] <- mean(d2007$p_housing_own, na.rm=T)
+  
+  d2011$log_pop_denc[which(is.na(d2011$log_pop_denc))] <- mean(d2011$log_pop_denc, na.rm=T)
+  d2011$log_pop[which(is.na(d2011$log_pop))] <- mean(d2011$log_pop, na.rm=T)
+  d2011$log_median_inc[which(is.na(d2011$log_median_inc))] <- mean(d2011$log_median_inc, na.rm=T)
+  d2011$avg_home_val_log[which(is.na(d2011$avg_home_val_log))] <- mean(d2011$avg_home_val_log, na.rm=T)
+  d2011$avg_home_val[which(is.na(d2011$avg_home_val))] <- mean(d2011$avg_home_val, na.rm=T)
+  d2011$unemploy_rate[which(is.na(d2011$unemploy_rate))] <- mean(d2011$unemploy_rate, na.rm=T)
+  d2011$p_uni_degree[which(is.na(d2011$p_uni_degree))] <- mean(d2011$p_uni_degree, na.rm=T)
+  d2011$p_immigrant[which(is.na(d2011$p_immigrant))] <- mean(d2011$p_immigrant, na.rm=T)
+  d2011$p_housing_own[which(is.na(d2011$p_housing_own))] <- mean(d2011$p_housing_own, na.rm=T)
+  
+  d2003$log_pop_denc[which(is.na(d2003$log_pop_denc))] <- mean(d2003$log_pop_denc, na.rm=T)
+  d2003$log_pop[which(is.na(d2003$log_pop))] <- mean(d2003$log_pop, na.rm=T)
+  d2003$log_median_inc[which(is.na(d2003$log_median_inc))] <- mean(d2003$log_median_inc, na.rm=T)
+  d2003$avg_home_val_log[which(is.na(d2003$avg_home_val_log))] <- mean(d2003$avg_home_val_log, na.rm=T)
+  d2003$avg_home_val[which(is.na(d2003$avg_home_val))] <- mean(d2003$avg_home_val, na.rm=T)
+  d2003$unemploy_rate[which(is.na(d2003$unemploy_rate))] <- mean(d2003$unemploy_rate, na.rm=T)
+  d2003$p_uni_degree[which(is.na(d2003$p_uni_degree))] <- mean(d2003$p_uni_degree, na.rm=T)
+  d2003$p_immigrant[which(is.na(d2003$p_immigrant))] <- mean(d2003$p_immigrant, na.rm=T)
+  d2003$p_housing_own[which(is.na(d2003$p_housing_own))] <- mean(d2003$p_housing_own, na.rm=T)
+  
+  # put the data back together
+  dt <- rbind(d2003,d2007,d2011)
+  
+  #make square terms for each variable - used in entropy balancing
+  dt$log_pop_sq <- (dt$log_pop)^2
+  dt$log_pop_denc_sq <- (dt$log_pop_denc)^2
+  dt$log_median_inc_sq <- (dt$log_median_inc)^2
+  dt$avg_home_val_log_sq <- (dt$avg_home_val_log)^2
+  dt$unemploy_rate_sq <- (dt$unemploy_rate)^2
+  dt$p_uni_degree_sq <- (dt$p_uni_degree)^2
+  dt$p_immigrant_sq <- (dt$p_immigrant)^2
+  dt$p_housing_own_sq <- (dt$p_housing_own)^2
+  
+  #subset
+  d2007 <- dt[which(dt$year==2007),]
+  d2011 <- dt[which(dt$year==2011),]
+  d2003 <- dt[which(dt$year==2003),]
+  
+  # overwrite the initial data file with data without missing values
+  divisions <- dt
+  rm(dt)
+
+```
+
