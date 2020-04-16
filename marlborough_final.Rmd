@@ -70,8 +70,30 @@ divisions$fed_id <- as.factor(divisions$fed_id)
     return(yx2)
   }
 
-
 ```
 
+```{r vcov cluster function with demean, include=FALSE}
+
+vcovCluster_demean <- function(model, cluster, first)
+  {
+    require(sandwich)
+    require(lmtest)
+    cluster <- droplevels(cluster)
+    if(nrow(model.matrix(model))!=length(cluster)){
+      stop("check your data: cluster variable has different N than model")
+    }
+    M <- length(unique(cluster))
+    N <- length(cluster)           
+    K <- model$rank   
+    if(M<50){
+      warning("Fewer than 50 clusters, variances may be unreliable (could try block bootstrap instead).")
+    }
+    dfc <- (M/(M - 1)) * ((N - 1)/(N - K - first)) #NOTE: need to change this 6186 if the clusters is different
+    uj  <- apply(estfun(model), 2, function(x) tapply(x, cluster, sum));
+    rcse.cov <- dfc * sandwich(model, meat = crossprod(uj)/N)
+    return(rcse.cov)
+  }
+
+```
 
 
