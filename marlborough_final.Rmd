@@ -23,61 +23,9 @@ library(AER)
 library(plyr)
 library(scales) 
 library(RColorBrewer)
-library(tidyverse)
 
 ```
 
 ```{r reading in data, include = FALSE}
 
-divisions <- read.csv("raw-data/replication_file.csv", stringsAsFactors = FALSE, na.strings = c("NA", ""), strip.white = TRUE)
-
-divisions <- divisions %>% 
-  mutate(poll_id_07 = as.factor(poll_id_07)) %>% 
-  mutate(poll_id_03 = as.factor(poll_id_03)) %>% 
-  mutate(master_id = as.factor(master_id)) %>% 
-  mutate(fed_id = as.factor(fed_id))
-
-```
-
-```{r demeanor function, include=FALSE}
-
-
-demeaner <- function(yx, T, group, w = NULL) {
-  conds <- length(levels(T))
-  n <- length(T)
-  Td = as.data.frame(model.matrix( ~ T - 1, model.frame( ~ T - 1), contrasts =
-                                     FALSE)[1:n, 1:conds])
-  colnames(Td) <-
-    paste("Y", levels(T)[1:conds], sep = "") #puts a Y in front of the year/time variable so they are character strings
-  
-  yx <- cbind(yx, Td)
-  
-  yx2 <-
-    matrix(NA, nrow = nrow(yx), ncol = ncol(yx)) # this is a big empty matrix we will fill
-  group <- droplevels(group)
-  
-  for (c in levels(group)) {
-    yx.c <- as.matrix(yx[group == c, ], ncol = ncol(yx))
-    if (is.null(w)) {
-      yx2[group == c, ] <-
-        yx.c - matrix(rep(colMeans(yx.c), times = nrow(yx.c)),
-                      ncol = ncol(yx.c),
-                      byrow = TRUE)
-    } else {
-      yx2[group == c, ] <-
-        yx.c - matrix(rep(apply(yx.c, 2, weighted.mean, w = weights), times = nrow(yx.c)),
-                      ncol = ncol(yx.c),
-                      byrow = TRUE)
-    }
-  }
-  
-  colnames(yx2) <- colnames(yx)
-  
-  rm(yx)
-  yx2 = as.data.frame(yx2)
-  return(yx2)
-}
-
-
-```
 
