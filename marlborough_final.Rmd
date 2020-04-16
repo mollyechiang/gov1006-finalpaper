@@ -854,3 +854,14 @@ news <- read.csv("newspapers_count.csv", stringsAsFactors=FALSE, na.strings=c("N
 
 ```
 
+```{r figure 5}
+
+overlaps <- read.csv("precincts0711.csv", stringsAsFactors=FALSE, na.strings=c("NA", ""),  strip.white = TRUE)
+  
+  # Relevant variable, overlap_max, shows the amount of overlap between each precinct polygon in 2007 and 2011, as calculated in ArcGIS. 
+  plot(hist(overlaps$overlap_max, breaks=20), xlab="Maximum Proportion of Overlap between 2007 and 2011 Divisions", main="Extent of Division Redistricting")
+  
+  rm(overlaps)
+
+```
+
