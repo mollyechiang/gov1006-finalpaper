@@ -232,3 +232,71 @@ dt <- divisions
 
 ```
 
+```{r data construction, include=FALSE}
+
+div_rural <- divisions[which(divisions$pop_denc <= 400 & divisions$year==2007),] # Cut out divisions with population density greater than 400 people per km^2 in 2007. N=3169.
+  
+  # Need to find the matching 2003 and 2011 divisions to complete the panel.
+  a <- rbind(div_rural, d2011)
+  dup_id <- which(duplicated(a$master_id)==T)
+  dup_id_2 <- which(duplicated(a$master_id, fromLast = TRUE)==T)
+  keep <- c(dup_id,dup_id_2)
+  a <- a[keep,]
+  length(which(a$year==2007)) == length(which(a$year==2011)) # This is a check - you want this to say TRUE.
+  b <- rbind(d2003, div_rural)
+  dup_id <- which(duplicated(b$master_id)==T)
+  dup_id_2 <- which(duplicated(b$master_id, fromLast = TRUE)==T)
+  keep <- c(dup_id,dup_id_2)
+  b <- b[keep,]
+  length(which(b$year==2007)) == length(which(b$year==2003)) # This is a check - you want this to say TRUE.
+  div_rural <- rbind(a, b[which(b$year==2003),])
+  rm(a, b, dup_id, dup_id_2, keep)
+  
+  div_rural$master_id <- droplevels(div_rural$master_id) #Important before running analysis because master_id is a factor.
+  
+  #Check to see all treated units are still in this rural dataset:
+  propsr <- divisions[which(divisions$prop==1),] 
+  opsr <- divisions[which(divisions$op==1),]
+  length(unique(propsr$master_id)) #184
+  length(unique(opsr$master_id)) #52
+  rm(propsr, opsr)
+  
+  # Create weights for balanced models with entropy balancing:
+  # Proposed variable
+  N <- 6186
+  #Will use X and then X^2 to balance for each variable
+  X_bal <- d2003[,c("log_pop_denc", "log_pop", "log_median_inc", "avg_home_val_log", "unemploy_rate", "p_uni_degree", "p_immigrant", "p_housing_own", "log_pop_denc_sq", "log_pop_sq", "log_median_inc_sq", "avg_home_val_log_sq", "unemploy_rate_sq", "p_uni_degree_sq", "p_immigrant_sq", "p_housing_own_sq")] #variables to balance on, per the paper.
+  ebalout <- ebalance(Treatment=d2003$treat_p, X=X_bal)
+  
+  #That only gives weights for controls; I'd like an N-dim vector with all weights:
+  ebalw <- replicate(N, 1) #for every treated unit, give the weight of 1.
+  ebalw[d2003$treat_p==0]=ebalout$w #for every control unit, give the weight from the model.
+  
+  #Add the proposed variable weights to the dataset
+  d2007$weights_p <- ebalw
+  d2003$weights_p <- ebalw
+  d2011$weights_p <- ebalw
+  
+  divisions <- rbind(d2007, d2003, d2011)
+  rm(ebalout, ebalw, N, X_bal)
+  
+  # Operational variable
+  N <- 6186
+  X_bal <- d2003[,c("log_pop_denc", "log_pop", "log_median_inc", "avg_home_val_log" ,"unemploy_rate" , "p_uni_degree", "p_immigrant", "p_housing_own", "log_pop_denc_sq", "log_pop_sq", "log_median_inc_sq", "avg_home_val_log_sq" ,"unemploy_rate_sq" , "p_uni_degree_sq", "p_immigrant_sq", "p_housing_own_sq")] #variables to balance on, per the paper.
+  ebalout <- ebalance(Treatment=d2003$treat_o, X=X_bal)
+  
+  #That only gives weights for controls; I'd like an N-dim vector with all weights:
+  ebalw <- replicate(N, 1) #for every treated unit, give the weight of 1.
+  ebalw[d2003$treat_o==0]=ebalout$w #for every control unit, give the weight from the model.
+  
+  #weights are ebalw... 
+  d2007$weights_o <- ebalw
+  d2003$weights_o <- ebalw
+  d2011$weights_o <- ebalw
+  
+  divisions <- rbind(d2007, d2003, d2011)
+  rm(ebalout, ebalw, N, X_bal)
+
+
+```
+
