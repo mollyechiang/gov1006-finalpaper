@@ -357,3 +357,139 @@ ivpanel <- rbind(d2007_d, d2011_d) # IV panel does not include 2003 data. It onl
 
 ```
 
+```{r table 1}
+
+yx_data <- divisions[,c("perc_lib","prop")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_1 <- lm(perc_lib ~ prop + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_1, vcov=vcovCluster_demean(mod_1, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  # Column 1 (All Precincts), Section 2 (Turbine Operational)
+  # Using panel demeaning function 
+  yx_data <- divisions[,c("perc_lib","op")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_2 <- lm(perc_lib ~ op + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_2, vcov=vcovCluster_demean(mod_2, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 2 (All Precincts with Controls), Section 1 (Turbine Proposal)
+  divisions <- droplevels(divisions)
+  yx_data <- divisions[,c("perc_lib", "prop", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) # group needs to be a factor as well
+  mod_3 <- lm(perc_lib ~ prop + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed)
+  round(coeftest(mod_3, vcov=vcovCluster_demean(mod_3, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  # Column 2 (All Precincts with Controls), Section 2 (Turbine Operational)
+  divisions <- droplevels(divisions)
+  yx_data <- divisions[,c("perc_lib", "op", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) # group needs to be a factor as well
+  mod_4 <- lm(perc_lib ~ op + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed)
+  round(coeftest(mod_4, vcov=vcovCluster_demean(mod_4, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  
+  # Column 3 (Rural Precincts), Section 1 (Turbine Proposal)
+  div_rural <- droplevels(div_rural) #Note: you need to have created the rural subset in Data Construction section above.
+  yx_data <- div_rural[,c("perc_lib","prop")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(div_rural$year), group=div_rural$master_id)
+  mod_5 <- lm(perc_lib ~ prop + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_5, vcov=vcovCluster_demean(mod_5, cluster=div_rural$master_id, first=nrow(div_rural)/3)),3) 
+  
+  # Column 3 (Rural Precincts), Section 2 (Turbine Operational)
+  div_rural <- droplevels(div_rural)
+  yx_data <- div_rural[,c("perc_lib","op")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(div_rural$year), group=div_rural$master_id) # change dataset
+  mod_6 <- lm(perc_lib ~ op + Y2003 + Y2007, data=yx_diffed) #change treatment variable
+  round(coeftest(mod_6, vcov=vcovCluster_demean(mod_6, cluster=div_rural$master_id, first=nrow(div_rural)/3)),3) 
+  
+  
+  # Column 4 (Rural Precincts with Controls), Section 1 (Turbine Proposal)
+  div_rural <- droplevels(div_rural)
+  yx_data <- div_rural[,c("perc_lib", "prop", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(div_rural$year), group=div_rural$master_id)
+  mod_7 <- lm(perc_lib ~ prop + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed)
+  round(coeftest(mod_7, vcov=vcovCluster_demean(mod_7, cluster=div_rural$master_id, first=nrow(div_rural)/3)),3)
+  
+  # Column 4 (Rural Precincts with Controls), Section 2 (Turbine Operational)
+  div_rural <- droplevels(div_rural)
+  yx_data <- div_rural[,c("perc_lib", "op", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(div_rural$year), group=div_rural$master_id)
+  mod_8 <- lm(perc_lib ~ op + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed)
+  round(coeftest(mod_8, vcov=vcovCluster_demean(mod_8, cluster=div_rural$master_id, first=nrow(div_rural)/3)),3)
+  
+  
+  # Column 5 (Balanced Precincts), Section 1 (Turbine Proposal)
+  yx_data <- divisions[,c("perc_lib","prop")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_9 <- lm(perc_lib ~ prop + Y2003 + Y2007, data=yx_diffed, weights=divisions$weights_p) # add in weights
+  round(coeftest(mod_9, vcov=vcovCluster_demean(mod_9, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  # Column 5 (Balanced Precincts), Section 2 (Turbine Operational)
+  yx_data <- divisions[,c("perc_lib","op")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_10 <- lm(perc_lib ~ op + Y2003 + Y2007, data=yx_diffed, weights=divisions$weights_o) # add in weights
+  round(coeftest(mod_10, vcov=vcovCluster_demean(mod_10, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  
+  # Column 6 (Balanced Precincts), Section 1 (Turbine Proposal)
+  yx_data <- divisions[,c("perc_lib", "prop", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_11 <- lm(perc_lib ~ prop + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed, weights=divisions$weights_p) # add in weights
+  round(coeftest(mod_11, vcov=vcovCluster_demean(mod_11, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  # Column 6 (Balanced Precincts), Section 2 (Turbine Operational)
+  yx_data <- divisions[,c("perc_lib", "op", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_12 <- lm(perc_lib ~ op + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed, weights=divisions$weights_o) # add in weights
+  round(coeftest(mod_12, vcov=vcovCluster_demean(mod_12, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+  
+  rm(mod_1, mod_2, mod_3, mod_4, mod_5, mod_6, mod_7, mod_8, mod_9, mod_10, mod_11, mod_12, yx_data, yx_diffed)
+
+
+```
+
+```{r table 2}
+
+first <- lm(prop_3km ~ avg_pwr_log + mindistlake + mindistlake_sq + longitude + latitude + long_sq + lat_sq + long_lat + as.factor(ed_id), data=matchobj)
+  summary(first)
+  
+  # F-statistic on instrument 
+mod1 <- lm(prop_3km ~ longitude + latitude + long_sq + lat_sq + mindistlake + mindistlake_sq + long_lat + as.factor(ed_id), data=matchobj) # Run one model without the instrument.
+  mod2 <- lm(prop_3km ~ avg_pwr_log + longitude + latitude + long_sq + lat_sq + mindistlake + mindistlake_sq + long_lat + as.factor(ed_id), data=matchobj) # Run a second model with the instrument.
+  waldtest(mod2, mod1) #Compare the two using a wald test. F-statistic = 68.
+  
+  # Column 2, Second Stage
+summary(ivreg(chng_lib ~ prop_3km + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id) | avg_pwr_log + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id), data = matchobj))
+  
+rm(first, mod1, mod2)
+
+
+```
+
+```{r table 3}
+
+yx_data <- divisions[,c("perc_turnout","prop")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_1 <- lm(perc_turnout ~ prop + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_1, vcov=vcovCluster_demean(mod_1, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 2, Proposal in Precinct effect on Turnout
+  yx_data <- divisions[,c("perc_turnout","prop_3km")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_2 <- lm(perc_turnout ~ prop_3km + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_2, vcov=vcovCluster_demean(mod_2, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 3, Operational in Precinct effect on Turnout
+  yx_data <- divisions[,c("perc_turnout","op")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_3 <- lm(perc_turnout ~ op + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_3, vcov=vcovCluster_demean(mod_3, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 4, Operational in Precinct effect on Turnout
+  yx_data <- divisions[,c("perc_turnout","op_3km")]
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
+  mod_4 <- lm(perc_turnout ~ op_3km + Y2003 + Y2007, data=yx_diffed)
+  round(coeftest(mod_4, vcov=vcovCluster_demean(mod_4, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
+  
+rm(mod_1, mod_2, mod_3, mod_4, yx_data, yx_diffed)
+
+```
+
