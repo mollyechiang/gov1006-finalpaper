@@ -297,6 +297,63 @@ div_rural <- divisions[which(divisions$pop_denc <= 400 & divisions$year==2007),]
   divisions <- rbind(d2007, d2003, d2011)
   rm(ebalout, ebalw, N, X_bal)
 
+```
+
+```{r instrument, include=FALSE}
+
+d2011_d <- d2011[which(d2011$avg_pwr > 0),] # Only keeps units with windspeed data greater than 0.
+d2007_d <- d2007[which(d2007$prop_3km != 1),] # Removes units already treated in 2007 (within 3 km of turbine).
+ivpanel <- rbind(d2007_d, d2011_d) # IV panel does not include 2003 data. It only looks at changes between 2007 and 2011. However, 2003 data is used for robustness checks in SI.
+  
+  # Make the panel equally balanced by cutting out units that were removed in one year but not the others.
+  a <- ivpanel 
+  dup_id <- which(duplicated(a$master_id)==T)
+  dup_id_2 <- which(duplicated(a$master_id, fromLast = TRUE)==T)
+  keep <- c(dup_id,dup_id_2)
+  a <- a[keep,]
+  length(which(a$year==2007)) == length(which(a$year==2011)) # you want this to say TRUE.
+  rm(dup_id, dup_id_2, keep)
+  b <- a[which(a$year==2007),]
+  b <- rbind(b, d2003)
+  dup_id <- which(duplicated(b$master_id)==T)
+  dup_id_2 <- which(duplicated(b$master_id, fromLast = TRUE)==T)
+  keep <- c(dup_id,dup_id_2)
+  b <- b[keep,]
+  length(which(b$year==2007)) == length(which(b$year==2003)) # you want this to say TRUE.
+  a <- a[which(a$year==2011),]
+  ivpanel <- rbind(a, b)
+  rm(a, b, keep, dup_id, dup_id_2, d2011_d, d2007_d, d2003, d2007, d2011)
+  
+  ivd <- ivpanel[which(ivpanel$year==2011),] 
+  iv07 <- ivpanel[which(ivpanel$year==2007),]
+
+  sum(ivd$prop_3km) #354 - 2011 treated units, within 3 km of a proposed turbine - we will find matched control units for these.
+  
+  ivd$chng_lib <- ivd$perc_lib-iv07$perc_lib # new DV for instrumental variable cross section -- see Table 2.
+
+  # Create pre-treatment average home value data in IV data
+  ivd$avg_home_val_log_07 <- log(iv07$avg_home_val)
+  ivd$avg_home_val_log_07[which(is.na(ivd$avg_home_val_log_07))] <- mean(ivd$avg_home_val_log_07, na.rm=T)
+  
+  # Create other variables necessary for IV model
+  ivd$avg_pwr_log <- log(ivd$avg_pwr)
+  ivd$mindistlake_log <- log(1+ivd$mindistlake)
+  ivd$mindistlake_sq <- ivd$mindistlake * ivd$mindistlake
+  ivd$long_sq <- ivd$longitude * ivd$longitude
+  ivd$lat_sq <- ivd$latitude * ivd$latitude
+  ivd$long_lat <- ivd$latitude * ivd$longitude
+  
+  # Find 354 matched pairs for instrumental variable model. Match based of four variables reported in paper. Use 2011 'ivd' dataset created above.
+  match.covars <- ivd[,c("avg_home_val_log_07", "p_uni_degree", "log_median_inc", "log_pop_denc")]
+  sum(ivd$prop_3km==1) #354 - number of treated units
+  
+  match <- Match(Y=ivd$chng_lib, Tr=ivd$prop_3km, X=match.covars, estimand="ATT", M=1, exact=c(F,F,F,F), replace=FALSE) # Finding 1 controls for each unit and not allowing reuse. Matches do not have to be exact.
+  
+  matchobj_tr <- ivd[match$index.treated,] # these are the treated units
+  matchobj_ct <- ivd[match$index.control,] # these are the control units
+  matchobj <- rbind(matchobj_tr, matchobj_ct) # matched dataset, for instrument analysis
+  
+  rm(match.covars, ivd, iv07, ivpanel, match)
 
 ```
 
