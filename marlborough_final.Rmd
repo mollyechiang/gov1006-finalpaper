@@ -546,3 +546,49 @@ rm(mb, table)
 
 ```
 
+```{r figure 2}
+
+ptrends <- divisions
+  ptrends$year2 <- as.character(ptrends$year) # for labelling the plot
+  
+  # Left side of plot, Precincts with proposed turbines 
+  ptrends$status <- ifelse(ptrends$treat_p==1, "treated", "control")
+  pt <- summarySE(ptrends, measurevar="perc_lib", groupvars=c("status","year2")) # First need to run function above.
+  pt
+  
+  pd <- position_dodge(.15) # The errorbars overlapped, so use position_dodge to move them horizontally
+  
+  plot <- ggplot(pt, aes(x=year2, y=perc_lib, colour=status, group=status)) + 
+    geom_line(position=pd, size=1.40) +
+    scale_colour_manual(values=c("#0072B2", "#B22222")) +
+    geom_errorbar(aes(ymin=perc_lib-ci, ymax=perc_lib+ci), colour="black", width=.15, position=pd, size=0.75) +
+    geom_point(position=pd, size=2.5)
+  
+  plot +  
+    xlab("Election Year") + 
+    ylab("Liberal Party Vote Share") +
+    theme(plot.title = element_text(size=20), axis.text.x = element_text(colour="black", size=20), axis.text.y = element_text(colour="black", size=20), axis.title.x = element_text(colour="black", size=20), axis.title.y = element_text(colour="black", size=20), legend.position="none") +
+    scale_y_continuous(labels=percent, limits=c(0.20, 0.57))
+  
+  # Right side of plot, Precincts with operational turbines 
+  ptrends$status <- ifelse(ptrends$treat_o==1, "treated", "control") 
+  pt <- summarySE(ptrends, measurevar="perc_lib", groupvars=c("status","year2"))
+  pt
+  
+  plot <- ggplot(pt, aes(x=year2, y=perc_lib, colour=status, group=status, ymax=(0.55))) + 
+    geom_line(position=pd, size=1.40) +
+    scale_colour_manual(values=c("#0072B2", "#B22222")) +
+    geom_errorbar(aes(ymin=perc_lib-ci, ymax=perc_lib+ci), colour="black", width=.15, position=pd, size=0.75) +
+    geom_point(position=pd, size=2.5)
+  
+  plot +  
+    xlab("Election Year") + 
+    ylab("Liberal Party Vote Share") +
+    theme(plot.title = element_text(size=20), axis.text.x = element_text(colour="black", size=20), axis.text.y = element_text(colour="black", size=20), axis.title.x = element_text(colour="black", size=20), axis.title.y = element_text(colour="black", size=20), legend.position="none") +
+    scale_y_continuous(labels=percent, limits=c(0.20, 0.57)) 
+  
+  rm(pt, ptrends, plot, pd)
+
+
+```
+
