@@ -907,3 +907,13 @@ overlaps <- read.csv("precincts0711.csv", stringsAsFactors=FALSE, na.strings=c("
 
 ```
 
+```{r figure 7}
+
+matchobj$fits <- residuals(lm(chng_lib~as.factor(ed_id) + prop_3km + mindistlake + mindistlake_sq + longitude + latitude + long_lat + as.factor(ed_id), data=matchobj)) # fit the same model used in Table 2, without the instrument.
+  
+  # plot the residuals from that model against the instrument:
+  plot(x=matchobj$avg_pwr_log, y=matchobj$fits, xlab="Average Wind Power", ylab="Residual Change in Liberal Party Vote Share", main="Residuals of Predicted Change in Vote Share, Given \n Treatment, Riding Fixed Effects and Geographic Covariates")
+  lines(lowess(matchobj$avg_pwr_log,matchobj$fits), col="blue") 
+
+```
+
