@@ -535,3 +535,14 @@ rm(mb, table)
 
 ```
 
+```{r table 7}
+
+mb <- MatchBalance(prop_3km ~ p_uni_degree + log_median_inc + avg_home_val_log_07 + log_pop_denc, data=matchobj, ks=T) # Used matched pair dataset created above.
+  table <- baltest.collect(matchbal.out=mb, var.names=c("Population with a university degree (%)", "Median income (log)", "Average home value 2006 (log)", "Pop Density (log)"), after=F)
+  round(table, 3)
+  
+rm(mb, table)
+
+
+```
+
