@@ -24,8 +24,23 @@ library(plyr)
 library(scales) 
 library(RColorBrewer)
 
+options(digits=10)
+options(scipen=10)
+set.seed(02139)
+
 ```
 
 ```{r reading in data, include = FALSE}
+
+divisions <- read.csv("replication_file.csv", stringsAsFactors=FALSE, na.strings=c("NA", ""),  strip.white = TRUE)
+
+divisions$poll_id_07 <- as.factor(divisions$poll_id_07) #several variables need to be factors to ensure the functions run properly
+divisions$master_id <- as.factor(divisions$master_id)
+divisions$poll_id_03 <- as.factor(divisions$poll_id_03)
+divisions$fed_id <- as.factor(divisions$fed_id)
+
+```
+
+
 
 
