@@ -493,3 +493,33 @@ rm(mod_1, mod_2, mod_3, mod_4, yx_data, yx_diffed)
 
 ```
 
+```{r table 4}
+
+yx_data <- divisions[,c("perc_lib_fed","prop")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) 
+  mod_1 <- lm(perc_lib_fed ~ prop + Y2003 + Y2007, data=yx_diffed) 
+  round(coeftest(mod_1, vcov=vcovCluster_demean(mod_1, cluster=divisions$fed_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 2, Proposal within 3 km of Precinct effect on Federal Liberal Party Vote Share
+  yx_data <- divisions[,c("perc_lib_fed","prop_3km")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) 
+  mod_2 <- lm(perc_lib_fed ~ prop_3km + Y2003 + Y2007, data=yx_diffed) 
+  round(coeftest(mod_2, vcov=vcovCluster_demean(mod_2, cluster=divisions$fed_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 3, Operational in Precinct effect on Federal Liberal Party Vote Share
+  yx_data <- divisions[,c("perc_lib_fed","op")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) 
+  mod_3 <- lm(perc_lib_fed ~ op + Y2003 + Y2007, data=yx_diffed) 
+  round(coeftest(mod_3, vcov=vcovCluster_demean(mod_3, cluster=divisions$fed_id, first=nrow(divisions)/3)),3) 
+  
+  # Column 4, Operational within 3 km of Precinct effect on Federal Liberal Party Vote Share
+  yx_data <- divisions[,c("perc_lib_fed","op_3km")] 
+  yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id) 
+  mod_4 <- lm(perc_lib_fed ~ op_3km + Y2003 + Y2007, data=yx_diffed) 
+  round(coeftest(mod_4, vcov=vcovCluster_demean(mod_4, cluster=divisions$fed_id, first=nrow(divisions)/3)),3) 
+  
+  rm(mod_1, mod_2, mod_3, mod_4, yx_data, yx_diffed)
+
+
+```
+
