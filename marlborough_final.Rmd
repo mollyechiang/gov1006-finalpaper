@@ -23,10 +23,11 @@ library(AER)
 library(plyr)
 library(scales) 
 library(RColorBrewer)
+library(rstanarm)
+library(stargazer)
 
 options(digits=10)
 options(scipen=10)
-set.seed(02139)
 
 ```
 
@@ -357,7 +358,7 @@ ivpanel <- rbind(d2007_d, d2011_d) # IV panel does not include 2003 data. It onl
 
 ```
 
-```{r table 1}
+```{r table 1, include=FALSE}
 
 yx_data <- divisions[,c("perc_lib","prop")]
   yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
@@ -439,12 +440,13 @@ yx_data <- divisions[,c("perc_lib","prop")]
   yx_data <- divisions[,c("perc_lib", "op", "p_uni_degree", "log_pop_denc", "unemploy_rate", "log_median_inc", "p_immigrant")]
   yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
   mod_12 <- lm(perc_lib ~ op + Y2003 + Y2007 + p_uni_degree + log_pop_denc + unemploy_rate + log_median_inc + p_immigrant, data=yx_diffed, weights=divisions$weights_o) # add in weights
-  round(coeftest(mod_12, vcov=vcovCluster_demean(mod_12, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+round(coeftest(mod_12, vcov=vcovCluster_demean(mod_12, cluster=divisions$master_id, first=nrow(divisions)/3)),3)
+
   
-  rm(mod_1, mod_2, mod_3, mod_4, mod_5, mod_6, mod_7, mod_8, mod_9, mod_10, mod_11, mod_12, yx_data, yx_diffed)
-
-
 ```
+
+
+
 
 ```{r table 2}
 
@@ -458,9 +460,6 @@ mod1 <- lm(prop_3km ~ longitude + latitude + long_sq + lat_sq + mindistlake + mi
   
   # Column 2, Second Stage
 summary(ivreg(chng_lib ~ prop_3km + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id) | avg_pwr_log + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id), data = matchobj))
-  
-rm(first, mod1, mod2)
-
 
 ```
 
@@ -488,8 +487,6 @@ yx_data <- divisions[,c("perc_turnout","prop")]
   yx_diffed <- demeaner(yx=yx_data, T=as.factor(divisions$year), group=divisions$master_id)
   mod_4 <- lm(perc_turnout ~ op_3km + Y2003 + Y2007, data=yx_diffed)
   round(coeftest(mod_4, vcov=vcovCluster_demean(mod_4, cluster=divisions$master_id, first=nrow(divisions)/3)),3) 
-  
-rm(mod_1, mod_2, mod_3, mod_4, yx_data, yx_diffed)
 
 ```
 
@@ -518,32 +515,6 @@ yx_data <- divisions[,c("perc_lib_fed","prop")]
   mod_4 <- lm(perc_lib_fed ~ op_3km + Y2003 + Y2007, data=yx_diffed) 
   round(coeftest(mod_4, vcov=vcovCluster_demean(mod_4, cluster=divisions$fed_id, first=nrow(divisions)/3)),3) 
   
-  rm(mod_1, mod_2, mod_3, mod_4, yx_data, yx_diffed)
-
-
-```
-
-```{r table 6}
-
-d2003 <- divisions[which(divisions$year==2003),]
-  mb <- MatchBalance(treat_p_3km ~ perc_lib + p_uni_degree + log_median_inc + avg_home_val + log_pop_denc, data=d2003, ks=T) 
-  table <- baltest.collect(matchbal.out=mb, var.names=c("Liberal Vote Share", "Highest Degree Uni %",  "Median Income (log)", "Average value of home", "Population density (log)"), after=F)
-  round(table, 3)
-  
-rm(mb, table)
-
-
-```
-
-```{r table 7}
-
-mb <- MatchBalance(prop_3km ~ p_uni_degree + log_median_inc + avg_home_val_log_07 + log_pop_denc, data=matchobj, ks=T) # Used matched pair dataset created above.
-  table <- baltest.collect(matchbal.out=mb, var.names=c("Population with a university degree (%)", "Median income (log)", "Average home value 2006 (log)", "Pop Density (log)"), after=F)
-  round(table, 3)
-  
-rm(mb, table)
-
-
 ```
 
 ```{r figure 2}
@@ -587,9 +558,6 @@ ptrends <- divisions
     theme(plot.title = element_text(size=20), axis.text.x = element_text(colour="black", size=20), axis.text.y = element_text(colour="black", size=20), axis.title.x = element_text(colour="black", size=20), axis.title.y = element_text(colour="black", size=20), legend.position="none") +
     scale_y_continuous(labels=percent, limits=c(0.20, 0.57)) 
   
-  rm(pt, ptrends, plot, pd)
-
-
 ```
 
 ```{r figure 3}
@@ -834,86 +802,28 @@ plot_prop_omit <- data.frame(dist=c("0km","1km","2km","3km","4km","5km"), ATT=c(
     theme(axis.text.x = element_text(colour="black", size=18), axis.text.y = element_text(colour="black", size=18), axis.title.x = element_text(colour="black", size=18), axis.title.y = element_text(colour="black", size=18)) +
     scale_y_continuous(labels=percent)
   
-  # Remove dataframes:
-  rm(plot_op_omit, plot_prop_omit, yx_data, yx_diffed, dkm0, dkm1, dkm2, dkm3, dkm4, dkm5, mod_1)
-
-
 ```
 
-```{r figure 4}
+### Extension
 
-news <- read.csv("newspapers_count.csv", stringsAsFactors=FALSE, na.strings=c("NA", ""),  strip.white = TRUE)
-  news
-  
-  ggplot(data=news, aes(x=year, y=count)) + geom_bar(stat="identity") +
-    scale_x_continuous(breaks=c(2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011), name="Year") +
-    scale_y_continuous(breaks=c(0, 10, 20, 30, 40, 50, 60), name="Number of Newspaper Articles") +
-    theme(legend.position="none", axis.ticks.y=element_blank(), axis.text.x = element_text(size=13, color="black"), axis.text.y = element_text(size=13, color="black"), axis.title.x = element_text(size=14), axis.title.y = element_text(size=14))
-  
-  rm(news)
+```{r stan_glm table 2}
 
-```
-
-```{r figure 5}
-
-overlaps <- read.csv("precincts0711.csv", stringsAsFactors=FALSE, na.strings=c("NA", ""),  strip.white = TRUE)
+first_b <- stan_glm(prop_3km ~ avg_pwr_log + mindistlake + mindistlake_sq + longitude + latitude + long_sq + lat_sq + long_lat + as.factor(ed_id), data=matchobj, refresh = 0)
+summary(first_b)
   
-  # Relevant variable, overlap_max, shows the amount of overlap between each precinct polygon in 2007 and 2011, as calculated in ArcGIS. 
-  plot(hist(overlaps$overlap_max, breaks=20), xlab="Maximum Proportion of Overlap between 2007 and 2011 Divisions", main="Extent of Division Redistricting")
+  # F-statistic on instrument 
+mod1_b <- stan_glm(prop_3km ~ longitude + latitude + long_sq + lat_sq + mindistlake + mindistlake_sq + long_lat + as.factor(ed_id), data=matchobj, refresh = 0) # Run one model without the instrument.
+mod2_b <- stan_glm(prop_3km ~ avg_pwr_log + longitude + latitude + long_sq + lat_sq + mindistlake + mindistlake_sq + long_lat + as.factor(ed_id), data=matchobj, refresh = 0) # Run a second model with the instrument.
+
   
-  rm(overlaps)
+  # Column 2, Second Stage
+summary(ivreg(chng_lib ~ prop_3km + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id) | avg_pwr_log + mindistlake + mindistlake_sq + longitude + long_sq + latitude + lat_sq + long_lat + as.factor(ed_id), data = matchobj), digits = 4)
+  
+stargazer(first_b, title = "Regression")
 
 ```
-
-```{r figure 6}
-
-  d2011 <- divisions[which(divisions$year==2011),]
-  d2003 <- divisions[which(divisions$year==2003),]
-  
-  # Left side of figure, 2003 liberal party voteshare
-  mt <- mean(d2003$perc_lib[which(d2003$treat_p==1)])
-  mc <- mean(d2003$perc_lib[which(d2003$treat_p==0)])
-  df.hlines <- data.frame(treat_p=c("0","1"), hline=c(mc,mt))
-  df.hlines
-  
-  plot <- ggplot(d2003, aes(x=as.factor(treat_p), y=perc_lib, fill=as.factor(treat_p))) + geom_point(alpha = 0.55, position='jitter', size=1.5) + scale_fill_brewer(palette="Set1") # Given jitter and alpha (density of points) the plots will vary slightly with each creation.
-  
-  plot + geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline), colour="blue") + 
-    theme(legend.position="none", axis.text.x = element_text(size=13), axis.text.y = element_text(size=13)) + 
-    scale_y_continuous(name="Liberal Party Vote Share", limits=c(0,0.8)) + 
-    scale_x_discrete(labels=c("control", "treated"), name="") + 
-    coord_flip() + 
-    #opts(axis.text.y = theme_text(size = 12), axis.text.x = theme_text(size = 12)) + 
-    ggtitle("2003")
-  
-  
-  # Right side of figure, 2011 liberal party voteshare
-  mt <- mean(d2011$perc_lib[which(d2011$prop==1)])
-  mc <- mean(d2011$perc_lib[which(d2011$prop==0)])
-  
-  df.hlines <- data.frame(prop=c("0","1"), hline=c(mc,mt))
-  df.hlines
-  
-  plot <- ggplot(d2011, aes(x=as.factor(prop), y=perc_lib, fill=as.factor(prop))) + geom_point(alpha = 0.55, size=1.5, position='jitter') + scale_fill_brewer(palette="Set1")
-  
-  plot + geom_errorbar(data=df.hlines, aes(y=hline, ymax=hline, ymin=hline, xmax=1), colour="blue") + 
-    theme(legend.position="none", axis.ticks.y=element_blank(), axis.text.x = element_text(size=13), axis.text.y = element_text(size=13)) + 
-    scale_y_continuous(name="Liberal Party Vote Share", breaks=c(0.0, 0.2, 0.4, 0.6, 0.8, 1), limits=c(0,0.8)) + 
-    scale_x_discrete(labels="", name="") + 
-    coord_flip() + 
-    ggtitle("2011")
-  
-  rm(d2003, d2011, df.hlines, mc, mt, plot)
-
-```
-
-```{r figure 7}
-
-matchobj$fits <- residuals(lm(chng_lib~as.factor(ed_id) + prop_3km + mindistlake + mindistlake_sq + longitude + latitude + long_lat + as.factor(ed_id), data=matchobj)) # fit the same model used in Table 2, without the instrument.
-  
-  # plot the residuals from that model against the instrument:
-  plot(x=matchobj$avg_pwr_log, y=matchobj$fits, xlab="Average Wind Power", ylab="Residual Change in Liberal Party Vote Share", main="Residuals of Predicted Change in Vote Share, Given \n Treatment, Riding Fixed Effects and Geographic Covariates")
-  lines(lowess(matchobj$avg_pwr_log,matchobj$fits), col="blue") 
-
+```{r}
+mod_1x <- lm(perc_lib ~ prop + factor(master_id) + factor(year), data=divisions)
+  #round(coeftest(mod_1, vcov=vcovCluster(mod_1, cluster=divisions$master_id))[1:5,], 3)
 ```
 
