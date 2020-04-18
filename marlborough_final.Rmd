@@ -2,7 +2,8 @@
 title: "Final Paper"
 author: "Chelsea Marlborough"
 date: "4/15/2020"
-output: bookdown::pdf_document2
+#output: bookdown::pdf_document2
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -25,6 +26,11 @@ library(scales)
 library(RColorBrewer)
 library(rstanarm)
 library(bookdown)
+
+# I APOLOGIZE. I HAVE SWITCHED PAPERS MULTIPLE TIMES IN THE LAST MONTH/WEEK SO I
+# CONSTANTLY LEARNING NEW MATERIAL AND TRYING TO CATCH UP. THIS IS LITERALLY
+# JUST SOME FIGURES AND MY EXTENSION. I AM GOING TO WORK ON AESTHETICS LATER.
+# THANK YOU FOR YOUR UNDERSTANDING.
 
 ```
 
@@ -981,11 +987,17 @@ round(coeftest(
 
 ```
 
-```{r table 1 made, results="asis"}
+```{r table 1a made, results="asis"}
 
 library(stargazer)
 
-stargazer(mod_1, mod_2, mod_3, mod_4, mod_5, mod_6, mod_7, mod_8, mod_9, mod_10, mod_11, mod_12, type = "latex", add.lines = list(c("Fixed effects?", "Y", "Y”, Y", "Y", "Y", "Y")), title = "Effects of Wind Turbines on Incumbent Party Vote Share in Precincts")
+stargazer(mod_1, mod_3, mod_5, mod_7, mod_9, mod_11, type = "latex", add.lines = list(c("Fixed effects?", "Y", "Y”, Y", "Y", "Y", "Y")), title = "Effects of Wind Turbines on Incumbent Party Vote Share in Precincts")
+
+```
+
+```{r table 1b made, results="asis"}
+
+stargazer(mod_2, mod_4, mod_6, mod_8, mod_10, mod_12, type = "latex", add.lines = list(c("Fixed effects?", "Y", "Y”, Y", "Y", "Y", "Y")), title = "Effects of Wind Turbines on Incumbent Party Vote Share in Precincts")
 
 ```
 
@@ -2212,6 +2224,33 @@ mod_12 <-
 
 ```
 
+```{r print results of table 1}
+
+print(mod_1, digits = 3)
+
+print(mod_2, digits = 3)
+
+print(mod_3, digits = 3)
+
+print(mod_4, digits = 3)
+
+print(mod_5, digits = 3)
+
+print(mod_6, digits = 3)
+
+print(mod_7, digits = 3)
+
+print(mod_8, digits = 3)
+
+print(mod_9, digits = 3)
+
+print(mod_10, digits = 3)
+
+print(mod_11, digits = 3)
+
+print(mod_12, digits = 3)
+```
+By running a Bayesian regression on their model, I was able to find that their test was more robust than they may have expected. Not only did the coefficients match up from the lm() and stan_glm() models, the median absolute deviation also matches with the clusters of standard deviation found earlier. I was unable to run the cluster function on the Bayesian models and am planning to explore this futher.
 
 ```{r stan_glm table 2, include=FALSE}
 
